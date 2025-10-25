@@ -1,0 +1,1 @@
+ALTER TABLE `ebookMetadata` ADD `platformRecommendations` text;

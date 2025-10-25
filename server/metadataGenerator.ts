@@ -1,4 +1,5 @@
 import { invokeLLM } from "./_core/llm";
+import { analyzePlatformRecommendations, PlatformRecommendation } from "./platformRecommendations";
 
 export interface OptimizedMetadata {
   optimizedTitle: string;
@@ -8,6 +9,7 @@ export interface OptimizedMetadata {
   categories: string[];
   suggestedPrice: string;
   targetAudience: string;
+  platformRecommendations?: PlatformRecommendation[];
 }
 
 /**
@@ -106,6 +108,9 @@ Gere:
     : '{}';
   const metadata = JSON.parse(contentStr);
 
+  // Generate platform recommendations in parallel
+  const platformRecommendations = await analyzePlatformRecommendations(theme, originalTitle);
+
   return {
     optimizedTitle: metadata.optimizedTitle || originalTitle,
     shortDescription: metadata.shortDescription || "",
@@ -114,6 +119,7 @@ Gere:
     categories: metadata.categories || [],
     suggestedPrice: metadata.suggestedPrice || "R$ 27,00",
     targetAudience: metadata.targetAudience || "",
+    platformRecommendations,
   };
 }
 

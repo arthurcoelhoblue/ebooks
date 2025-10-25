@@ -121,6 +121,7 @@ export const appRouter = router({
               categories: JSON.stringify(metadata.categories),
               suggestedPrice: metadata.suggestedPrice,
               targetAudience: metadata.targetAudience,
+              platformRecommendations: JSON.stringify(metadata.platformRecommendations || []),
             });
 
             // Update ebook with results
@@ -354,8 +355,8 @@ export const appRouter = router({
         return getPublicationsByEbookId(input.ebookId);
       }),
 
-    // Mark as published
-    create: protectedProcedure
+    // Mark ebook as published on a platform
+    publish: protectedProcedure
       .input((val: unknown) => {
         if (
           typeof val === "object" &&
@@ -369,22 +370,24 @@ export const appRouter = router({
             ebookId: val.ebookId,
             platform: val.platform as "amazon_kdp" | "hotmart" | "eduzz" | "monetizze",
             publicationUrl: "publicationUrl" in val && typeof val.publicationUrl === "string" ? val.publicationUrl : undefined,
-            notes: "notes" in val && typeof val.notes === "string" ? val.notes : undefined,
+            trafficCost: "trafficCost" in val && typeof val.trafficCost === "string" ? val.trafficCost : undefined,
+            otherCosts: "otherCosts" in val && typeof val.otherCosts === "string" ? val.otherCosts : undefined,
+            revenue: "revenue" in val && typeof val.revenue === "string" ? val.revenue : undefined,
           };
         }
         throw new Error("Invalid input");
       })
       .mutation(async ({ input }) => {
         const { createPublication } = await import("./db");
-        const id = await createPublication({
+        await createPublication({
           ebookId: input.ebookId,
           platform: input.platform,
           publicationUrl: input.publicationUrl,
-          notes: input.notes,
-          published: 1,
-          publishedAt: new Date(),
+          trafficCost: input.trafficCost,
+          otherCosts: input.otherCosts,
+          revenue: input.revenue,
         });
-        return { id };
+        return { success: true };
       }),
 
     // Remove publication

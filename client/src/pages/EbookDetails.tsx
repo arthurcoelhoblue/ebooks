@@ -118,7 +118,7 @@ export default function EbookDetails() {
   const [selectedPlatform, setSelectedPlatform] = useState<"amazon_kdp" | "hotmart" | "eduzz" | "monetizze">("amazon_kdp");
   const [publicationUrl, setPublicationUrl] = useState("");
 
-  const publishMutation = trpc.publications.create.useMutation({
+  const publishMutation = trpc.publications.publish.useMutation({
     onSuccess: () => {
       toast.success("Publicação registrada!");
       setShowPublishDialog(false);
@@ -667,7 +667,9 @@ export default function EbookDetails() {
                 ebookId,
                 platform: selectedPlatform,
                 publicationUrl: publicationUrl || undefined,
-                notes: undefined,
+                trafficCost: undefined,
+                otherCosts: undefined,
+                revenue: undefined,
               })}
               disabled={publishMutation.isPending}
             >

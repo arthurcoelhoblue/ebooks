@@ -101,6 +101,7 @@ export const ebookMetadata = mysqlTable("ebookMetadata", {
   categories: text("categories"), // JSON array of categories
   suggestedPrice: varchar("suggestedPrice", { length: 50 }),
   targetAudience: text("targetAudience"),
+  platformRecommendations: text("platformRecommendations"), // JSON array of platform recommendations
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -119,6 +120,10 @@ export const publications = mysqlTable("publications", {
   publicationUrl: text("publicationUrl"),
   publishedAt: timestamp("publishedAt").defaultNow().notNull(),
   notes: text("notes"),
+  // Financial data per platform
+  trafficCost: varchar("trafficCost", { length: 20 }).default("0"),
+  otherCosts: varchar("otherCosts", { length: 20 }).default("0"),
+  revenue: varchar("revenue", { length: 20 }).default("0"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

@@ -31,6 +31,20 @@
 - [ ] Execução automática dos agendamentos via cron job (requer configuração de servidor)
 
 ## In Progress
+- [ ] Tutoriais detalhados por plataforma (modal/página separada)
+- [ ] Botão "Ver Tutorial Completo" em cada guia
+- [ ] Requisitos, documentação e passo a passo com exemplos
+- [ ] Recomendação inteligente de plataformas por tema
+- [ ] Análise do nicho do eBook com IA
+- [ ] Badge visual mostrando potencial (alta/média/baixa) por plataforma
+- [ ] Dados financeiros por plataforma (ao invés de geral)
+- [ ] Cada publicação com tráfego, custos e receita próprios
+- [ ] Comparação de performance entre plataformas
+- [ ] Ranking de eBooks por performance
+- [ ] Ordenação por lucro, ROI, receita
+- [ ] Gráficos de performance
+- [ ] Badges de destaque (top 3)
+- [ ] Filtros por período e status
 
 ## Recently Added
 - [x] Worker de processamento de agendamentos (schedulerWorker.ts)
