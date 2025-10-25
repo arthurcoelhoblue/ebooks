@@ -232,6 +232,7 @@ export const appRouter = router({
             themes: "themes" in val && typeof val.themes === "string" ? val.themes : undefined,
             singleTheme: "singleTheme" in val && typeof val.singleTheme === "string" ? val.singleTheme : undefined,
             author: val.author,
+            scheduledTime: "scheduledTime" in val && typeof val.scheduledTime === "string" ? val.scheduledTime : undefined,
           };
         }
         throw new Error("Invalid input");
@@ -242,12 +243,31 @@ export const appRouter = router({
         // Calculate next run time
         const now = new Date();
         const nextRunAt = new Date(now);
-        if (input.frequency === "daily") {
-          nextRunAt.setDate(nextRunAt.getDate() + 1);
-        } else if (input.frequency === "weekly") {
-          nextRunAt.setDate(nextRunAt.getDate() + 7);
+        
+        // If scheduledTime is provided, set the time
+        if (input.scheduledTime) {
+          const [hours, minutes] = input.scheduledTime.split(":").map(Number);
+          nextRunAt.setHours(hours, minutes, 0, 0);
+          
+          // If the time has already passed today, move to next occurrence
+          if (nextRunAt <= now) {
+            if (input.frequency === "daily") {
+              nextRunAt.setDate(nextRunAt.getDate() + 1);
+            } else if (input.frequency === "weekly") {
+              nextRunAt.setDate(nextRunAt.getDate() + 7);
+            } else {
+              nextRunAt.setMonth(nextRunAt.getMonth() + 1);
+            }
+          }
         } else {
-          nextRunAt.setMonth(nextRunAt.getMonth() + 1);
+          // No specific time, just add the interval
+          if (input.frequency === "daily") {
+            nextRunAt.setDate(nextRunAt.getDate() + 1);
+          } else if (input.frequency === "weekly") {
+            nextRunAt.setDate(nextRunAt.getDate() + 7);
+          } else {
+            nextRunAt.setMonth(nextRunAt.getMonth() + 1);
+          }
         }
 
         const scheduleId = await createSchedule({
@@ -259,6 +279,7 @@ export const appRouter = router({
           themes: input.themes,
           singleTheme: input.singleTheme,
           author: input.author,
+          scheduledTime: input.scheduledTime,
           active: 1,
           nextRunAt,
         });

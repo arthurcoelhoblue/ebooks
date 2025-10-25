@@ -1,0 +1,1 @@
+ALTER TABLE `schedules` ADD `scheduledTime` varchar(5);

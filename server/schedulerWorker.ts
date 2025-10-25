@@ -140,8 +140,16 @@ export async function processSchedules() {
         }
       })();
 
-      // Update schedule
+      // Update schedule - calculate next run time
       const nextRunAt = new Date(now);
+      
+      if (schedule.scheduledTime) {
+        // If there's a scheduled time, use it
+        const [hours, minutes] = schedule.scheduledTime.split(":").map(Number);
+        nextRunAt.setHours(hours, minutes, 0, 0);
+      }
+      
+      // Add the frequency interval
       if (schedule.frequency === "daily") {
         nextRunAt.setDate(nextRunAt.getDate() + 1);
       } else if (schedule.frequency === "weekly") {

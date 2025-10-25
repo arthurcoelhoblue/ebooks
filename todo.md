@@ -34,4 +34,6 @@
 - [x] Worker de processamento de agendamentos (schedulerWorker.ts)
 - [x] Botão "Gerar Agora" para trigger manual de agendamentos
 - [x] Processamento assíncrono de geração de eBooks
+- [x] Campo para escolher horário específico de geração (formato HH:MM)
+- [x] Cálculo inteligente do próximo horário considerando hora escolhida
 

@@ -32,6 +32,7 @@ export default function Schedules() {
   const [themes, setThemes] = useState("");
   const [singleTheme, setSingleTheme] = useState("");
   const [author, setAuthor] = useState(user?.name || "");
+  const [scheduledTime, setScheduledTime] = useState("");
 
   const { data: schedules, isLoading, refetch } = trpc.schedules.list.useQuery();
   const createMutation = trpc.schedules.create.useMutation({
@@ -70,6 +71,7 @@ export default function Schedules() {
     setThemeMode("trending");
     setThemes("");
     setSingleTheme("");
+    setScheduledTime("");
   };
 
   const handleCreate = () => {
@@ -98,6 +100,7 @@ export default function Schedules() {
       themes: themeMode === "custom_list" ? JSON.stringify(themes.split("\n").filter((t) => t.trim())) : undefined,
       singleTheme: themeMode === "single_theme" ? singleTheme : undefined,
       author,
+      scheduledTime: scheduledTime || undefined,
     });
   };
 
@@ -214,6 +217,19 @@ export default function Schedules() {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="scheduledTime">Horário de Geração (opcional)</Label>
+                    <Input
+                      id="scheduledTime"
+                      type="time"
+                      value={scheduledTime}
+                      onChange={(e) => setScheduledTime(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Se não especificado, será gerado imediatamente após o intervalo
+                    </p>
+                  </div>
+
                   <div className="space-y-3">
                     <Label>Modo de Seleção de Temas *</Label>
                     <RadioGroup value={themeMode} onValueChange={(v: any) => setThemeMode(v)}>
@@ -318,7 +334,10 @@ export default function Schedules() {
                         <CardDescription className="mt-2 space-y-1">
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4" />
-                            <span>Frequência: {getFrequencyLabel(schedule.frequency)}</span>
+                            <span>
+                              Frequência: {getFrequencyLabel(schedule.frequency)}
+                              {schedule.scheduledTime && ` às ${schedule.scheduledTime}`}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Sparkles className="w-4 h-4" />
