@@ -35,6 +35,7 @@ export default function Schedules() {
   const [scheduledTime, setScheduledTime] = useState("");
 
   const { data: schedules, isLoading, refetch } = trpc.schedules.list.useQuery();
+  const { data: ebooks } = trpc.ebooks.list.useQuery();
   const createMutation = trpc.schedules.create.useMutation({
     onSuccess: () => {
       toast.success("Agendamento criado com sucesso!");
@@ -331,7 +332,14 @@ export default function Schedules() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <CardTitle className="text-xl">{schedule.name}</CardTitle>
-                        <CardDescription className="mt-2 space-y-1">
+                        <CardDescription className="mt-2 space-y-2">
+                          {ebooks && ebooks.filter(e => e.status === "processing").length > 0 && (
+                            <div className="flex items-center gap-2 text-blue-600 font-medium">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>{ebooks.filter(e => e.status === "processing").length} eBook(s) sendo gerado(s) agora</span>
+                            </div>
+                          )}
+                        <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4" />
                             <span>
@@ -349,6 +357,7 @@ export default function Schedules() {
                               Progresso: {schedule.generatedCount} / {schedule.totalEbooks} eBooks
                             </span>
                           </div>
+                        </div>
                         </CardDescription>
                       </div>
                       <div className="flex gap-2">

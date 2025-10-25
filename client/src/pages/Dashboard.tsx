@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
 import { BookOpen, Calendar, Download, FileText, Loader2, Plus, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Link } from "wouter";
 
@@ -19,6 +19,16 @@ export default function Dashboard() {
   const [numChapters, setNumChapters] = useState(5);
 
   const { data: ebooks, isLoading, refetch } = trpc.ebooks.list.useQuery();
+
+  // Auto-refresh every 5 seconds if there are processing ebooks
+  useEffect(() => {
+    if (ebooks && ebooks.some(e => e.status === "processing")) {
+      const interval = setInterval(() => {
+        refetch();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [ebooks, refetch]);
   const createMutation = trpc.ebooks.create.useMutation({
     onSuccess: () => {
       toast.success("eBook em geração! Aguarde alguns minutos...");
@@ -65,7 +75,15 @@ export default function Dashboard() {
           {/* Header with CTA */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold">Meus eBooks</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-3xl font-bold">Meus eBooks</h2>
+                {ebooks && ebooks.filter(e => e.status === "processing").length > 0 && (
+                  <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-full text-sm font-medium">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {ebooks.filter(e => e.status === "processing").length} gerando agora
+                  </div>
+                )}
+              </div>
               <p className="text-muted-foreground mt-2">Gerencie seus eBooks criados com IA</p>
             </div>
             <div className="flex gap-3">
@@ -162,16 +180,35 @@ export default function Dashboard() {
           ) : ebooks && ebooks.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {ebooks.map((ebook) => (
-                <Card key={ebook.id} className="hover:shadow-lg transition-shadow">
+                <Card key={ebook.id} className="hover:shadow-lg transition-shadow relative">
+                  {ebook.status === "processing" && (
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Gerando eBook...
+                      </div>
+                    </div>
+                  )}
+                  {ebook.status === "completed" && (
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                        ✓ Concluído
+                      </div>
+                    </div>
+                  )}
+                  {ebook.status === "failed" && (
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                        ✗ Erro
+                      </div>
+                    </div>
+                  )}
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                      <div className="flex-1 pr-32">
                         <CardTitle className="line-clamp-2">{ebook.title}</CardTitle>
                         <CardDescription className="mt-2">por {ebook.author}</CardDescription>
                       </div>
-                      {ebook.status === "processing" && (
-                        <Loader2 className="w-5 h-5 text-purple-600 animate-spin flex-shrink-0" />
-                      )}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">

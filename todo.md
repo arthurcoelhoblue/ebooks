@@ -30,10 +30,16 @@
 - [ ] Dashboard com estatísticas de eBooks gerados
 - [ ] Execução automática dos agendamentos via cron job (requer configuração de servidor)
 
+## In Progress
+
 ## Recently Added
 - [x] Worker de processamento de agendamentos (schedulerWorker.ts)
 - [x] Botão "Gerar Agora" para trigger manual de agendamentos
 - [x] Processamento assíncrono de geração de eBooks
 - [x] Campo para escolher horário específico de geração (formato HH:MM)
 - [x] Cálculo inteligente do próximo horário considerando hora escolhida
+- [x] Badges de status em tempo real (Gerando/Concluído/Erro)
+- [x] Contador de eBooks em processamento no Dashboard
+- [x] Auto-refresh a cada 5s quando há eBooks sendo gerados
+- [x] Indicador visual na página de Agendamentos
 
