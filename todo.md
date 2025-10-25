@@ -79,4 +79,11 @@
 - [x] Tabela financialMetrics no banco de dados
 - [x] Interface de publicações melhorada (card com lista)
 - [x] Botão para remover publicações individualmente
+- [x] Redirecionamento automático para Dashboard após login
+- [x] Landing Page vencedora focada em conversão
+- [x] Hero section com CTA forte
+- [x] Social proof (1000+ eBooks gerados)
+- [x] Seção de benefícios (4 cards)
+- [x] Como funciona (4 passos)
+- [x] CTA final com urgência
 
