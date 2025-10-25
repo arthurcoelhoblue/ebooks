@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { z } from "zod";
 
 export const appRouter = router({
   system: systemRouter,
@@ -357,26 +358,14 @@ export const appRouter = router({
 
     // Mark ebook as published on a platform
     publish: protectedProcedure
-      .input((val: unknown) => {
-        if (
-          typeof val === "object" &&
-          val !== null &&
-          "ebookId" in val &&
-          typeof val.ebookId === "number" &&
-          "platform" in val &&
-          typeof val.platform === "string"
-        ) {
-          return {
-            ebookId: val.ebookId,
-            platform: val.platform as "amazon_kdp" | "hotmart" | "eduzz" | "monetizze",
-            publicationUrl: "publicationUrl" in val && typeof val.publicationUrl === "string" ? val.publicationUrl : undefined,
-            trafficCost: "trafficCost" in val && typeof val.trafficCost === "string" ? val.trafficCost : undefined,
-            otherCosts: "otherCosts" in val && typeof val.otherCosts === "string" ? val.otherCosts : undefined,
-            revenue: "revenue" in val && typeof val.revenue === "string" ? val.revenue : undefined,
-          };
-        }
-        throw new Error("Invalid input");
-      })
+      .input(z.object({
+        ebookId: z.number(),
+        platform: z.enum(["amazon_kdp", "hotmart", "eduzz", "monetizze"]),
+        publicationUrl: z.string().optional(),
+        trafficCost: z.string().optional(),
+        otherCosts: z.string().optional(),
+        revenue: z.string().optional(),
+      }))
       .mutation(async ({ input }) => {
         const { createPublication } = await import("./db");
         await createPublication({

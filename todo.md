@@ -86,4 +86,7 @@
 - [x] Seção de benefícios (4 cards)
 - [x] Como funciona (4 passos)
 - [x] CTA final com urgência
+- [x] Logo do EbookStudio criada (2 versões)
+- [x] Componente Header com logo e botão de logout
+- [x] Header adicionado no Dashboard
 
