@@ -57,4 +57,12 @@
 - [x] Links diretos para abrir plataformas
 - [x] Guia completo Amazon KDP (9 passos)
 - [x] Guia completo Hotmart (7 passos)
+- [x] Permitir múltiplas publicações visíveis simultaneamente
+- [x] Mostrar URL de cada plataforma publicada com link direto
+- [x] Sistema completo de controle financeiro por eBook
+- [x] Campos: investimento em tráfego, outros custos, receita
+- [x] Cálculo automático de lucro/prejuízo em tempo real
+- [x] Tabela financialMetrics no banco de dados
+- [x] Interface de publicações melhorada (card com lista)
+- [x] Botão para remover publicações individualmente
 

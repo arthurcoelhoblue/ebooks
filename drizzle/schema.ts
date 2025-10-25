@@ -125,3 +125,20 @@ export const publications = mysqlTable("publications", {
 
 export type Publication = typeof publications.$inferSelect;
 export type InsertPublication = typeof publications.$inferInsert;
+
+/**
+ * Financial metrics table - tracks costs and revenue per ebook
+ */
+export const financialMetrics = mysqlTable("financialMetrics", {
+  id: int("id").autoincrement().primaryKey(),
+  ebookId: int("ebookId").notNull(),
+  trafficCost: varchar("trafficCost", { length: 20 }).default("0"), // decimal as string
+  otherCosts: varchar("otherCosts", { length: 20 }).default("0"),
+  revenue: varchar("revenue", { length: 20 }).default("0"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FinancialMetric = typeof financialMetrics.$inferSelect;
+export type InsertFinancialMetric = typeof financialMetrics.$inferInsert;

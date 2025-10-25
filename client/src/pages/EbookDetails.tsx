@@ -23,7 +23,7 @@ import {
   X,
   Check,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Link, useParams } from "wouter";
 
@@ -73,6 +73,46 @@ export default function EbookDetails() {
   const { data: ebook, isLoading: ebookLoading } = trpc.ebooks.getById.useQuery({ id: ebookId });
   const { data: metadata, isLoading: metadataLoading } = trpc.metadata.getByEbookId.useQuery({ ebookId });
   const { data: publications, refetch: refetchPublications } = trpc.publications.getByEbookId.useQuery({ ebookId });
+  const { data: financialData, refetch: refetchFinancial } = trpc.financial.getByEbookId.useQuery({ ebookId });
+
+  const [trafficCost, setTrafficCost] = useState("");
+  const [otherCosts, setOtherCosts] = useState("");
+  const [revenue, setRevenue] = useState("");
+  const [financialNotes, setFinancialNotes] = useState("");
+
+  // Update local state when financial data loads
+  useEffect(() => {
+    if (financialData) {
+      setTrafficCost(financialData.trafficCost || "0");
+      setOtherCosts(financialData.otherCosts || "0");
+      setRevenue(financialData.revenue || "0");
+      setFinancialNotes(financialData.notes || "");
+    }
+  }, [financialData]);
+
+  const updateFinancialMutation = trpc.financial.update.useMutation({
+    onSuccess: () => {
+      toast.success("Dados financeiros atualizados!");
+      refetchFinancial();
+    },
+  });
+
+  const calculateProfit = () => {
+    const traffic = parseFloat(trafficCost || "0");
+    const other = parseFloat(otherCosts || "0");
+    const rev = parseFloat(revenue || "0");
+    return rev - traffic - other;
+  };
+
+  const handleSaveFinancial = () => {
+    updateFinancialMutation.mutate({
+      ebookId,
+      trafficCost,
+      otherCosts,
+      revenue,
+      notes: financialNotes,
+    });
+  };
 
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<"amazon_kdp" | "hotmart" | "eduzz" | "monetizze">("amazon_kdp");
@@ -180,39 +220,61 @@ export default function EbookDetails() {
               </div>
 
               {/* Publication Status */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium">Status de Publicação:</span>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    <span>Plataformas de Publicação</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowPublishDialog(true)}
+                      className="gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Adicionar Plataforma
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   {publications && publications.length > 0 ? (
-                    publications.map(pub => {
-                      const config = getPlatformConfig(pub.platform);
-                      return (
-                        <Badge key={pub.id} className={config?.color} variant="outline">
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          {config?.label}
-                          <button
-                            onClick={() => unpublishMutation.mutate({ ebookId, platform: pub.platform })}
-                            className="ml-2 hover:opacity-70"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      );
-                    })
+                    <div className="space-y-3">
+                      {publications.map(pub => {
+                        const config = getPlatformConfig(pub.platform);
+                        return (
+                          <div key={pub.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Badge className={config?.color} variant="outline">
+                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                {config?.label}
+                              </Badge>
+                              {pub.publicationUrl && (
+                                <a
+                                  href={pub.publicationUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                  Ver publicação
+                                </a>
+                              )}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => unpublishMutation.mutate({ ebookId, platform: pub.platform })}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
-                    <span className="text-sm text-muted-foreground">Não publicado</span>
+                    <p className="text-sm text-muted-foreground text-center py-4">Nenhuma publicação registrada</p>
                   )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowPublishDialog(true)}
-                    className="gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Marcar Publicação
-                  </Button>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Download Links */}
               <div className="flex gap-3">
@@ -235,6 +297,86 @@ export default function EbookDetails() {
               </div>
             </div>
           </div>
+
+          {/* Controle Financeiro */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-green-600" />
+                Controle Financeiro
+              </CardTitle>
+              <CardDescription>
+                Acompanhe investimentos e receitas deste eBook
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="trafficCost">Investimento em Tráfego (R$)</Label>
+                  <Input
+                    id="trafficCost"
+                    type="number"
+                    step="0.01"
+                    value={trafficCost}
+                    onChange={(e) => setTrafficCost(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="otherCosts">Outros Custos (R$)</Label>
+                  <Input
+                    id="otherCosts"
+                    type="number"
+                    step="0.01"
+                    value={otherCosts}
+                    onChange={(e) => setOtherCosts(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="revenue">Receita Total (R$)</Label>
+                  <Input
+                    id="revenue"
+                    type="number"
+                    step="0.01"
+                    value={revenue}
+                    onChange={(e) => setRevenue(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Lucro/Prejuízo:</span>
+                  <span className={`text-lg font-bold ${calculateProfit() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    R$ {calculateProfit().toFixed(2)}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Receita - (Tráfego + Outros Custos)
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="financialNotes">Observações</Label>
+                <Input
+                  id="financialNotes"
+                  value={financialNotes}
+                  onChange={(e) => setFinancialNotes(e.target.value)}
+                  placeholder="Anotações sobre custos e receitas..."
+                />
+              </div>
+
+              <Button
+                onClick={handleSaveFinancial}
+                disabled={updateFinancialMutation.isPending}
+                className="w-full"
+              >
+                {updateFinancialMutation.isPending ? "Salvando..." : "Salvar Dados Financeiros"}
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* Guias de Publicação */}
           <Tabs defaultValue="amazon_kdp" className="w-full">

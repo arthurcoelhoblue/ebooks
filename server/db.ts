@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, ebooks, InsertEbook, publishingGuides, InsertPublishingGuide, schedules, InsertSchedule, ebookMetadata, InsertEbookMetadata, publications, InsertPublication } from "../drizzle/schema";
+import { InsertUser, users, ebooks, InsertEbook, publishingGuides, InsertPublishingGuide, schedules, InsertSchedule, ebookMetadata, InsertEbookMetadata, publications, InsertPublication, financialMetrics, InsertFinancialMetric } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -226,4 +226,35 @@ export async function updatePublication(ebookId: number, platform: string, data:
         eq(publications.platform, platform as any)
       )
     );
+}
+
+// Financial Metrics
+export async function getFinancialMetricsByEbookId(ebookId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(financialMetrics).where(eq(financialMetrics.ebookId, ebookId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createFinancialMetrics(data: InsertFinancialMetric) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(financialMetrics).values(data) as any;
+  return Number(result.insertId);
+}
+
+export async function updateFinancialMetrics(ebookId: number, data: Partial<InsertFinancialMetric>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Check if exists
+  const existing = await getFinancialMetricsByEbookId(ebookId);
+  
+  if (existing) {
+    await db.update(financialMetrics)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(financialMetrics.ebookId, ebookId));
+  } else {
+    await createFinancialMetrics({ ebookId, ...data });
+  }
 }

@@ -409,6 +409,47 @@ export const appRouter = router({
       }),
   }),
 
+  financial: router({
+    // Get financial metrics for an ebook
+    getByEbookId: protectedProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "ebookId" in val && typeof val.ebookId === "number") {
+          return { ebookId: val.ebookId };
+        }
+        throw new Error("Invalid input");
+      })
+      .query(async ({ input }) => {
+        const { getFinancialMetricsByEbookId } = await import("./db");
+        return getFinancialMetricsByEbookId(input.ebookId);
+      }),
+
+    // Update financial metrics
+    update: protectedProcedure
+      .input((val: unknown) => {
+        if (
+          typeof val === "object" &&
+          val !== null &&
+          "ebookId" in val &&
+          typeof val.ebookId === "number"
+        ) {
+          return {
+            ebookId: val.ebookId,
+            trafficCost: "trafficCost" in val && typeof val.trafficCost === "string" ? val.trafficCost : undefined,
+            otherCosts: "otherCosts" in val && typeof val.otherCosts === "string" ? val.otherCosts : undefined,
+            revenue: "revenue" in val && typeof val.revenue === "string" ? val.revenue : undefined,
+            notes: "notes" in val && typeof val.notes === "string" ? val.notes : undefined,
+          };
+        }
+        throw new Error("Invalid input");
+      })
+      .mutation(async ({ input }) => {
+        const { updateFinancialMetrics } = await import("./db");
+        const { ebookId, ...data } = input;
+        await updateFinancialMetrics(ebookId, data);
+        return { success: true };
+      }),
+  }),
+
   metadata: router({
     // Get metadata for an ebook
     getByEbookId: protectedProcedure
