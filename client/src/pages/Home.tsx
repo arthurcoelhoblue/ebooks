@@ -31,10 +31,11 @@ export default function Home() {
       <header className="border-b border-white/10 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
         <div className="container py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {APP_LOGO && <img src={APP_LOGO} alt={APP_TITLE} className="h-8 w-8" />}
-            <h1 className="text-2xl font-bold text-white">
-              {APP_TITLE}
-            </h1>
+            <img src="/ebookstudio-icon.png" alt="EbookStudio" className="h-10 w-10" />
+            <div className="flex items-center gap-1">
+              <span className="text-2xl font-bold text-purple-300">Ebook</span>
+              <span className="text-2xl font-bold text-blue-300">Studio</span>
+            </div>
           </div>
           <Button asChild size="lg" className="bg-white text-purple-900 hover:bg-gray-100">
             <a href={getLoginUrl()}>Começar Agora</a>
@@ -60,7 +61,7 @@ export default function Home() {
             </h2>
             
             <p className="text-xl md:text-2xl text-purple-100 max-w-2xl mx-auto">
-              Nossa IA gera eBooks profissionais completos em minutos. Você escolhe o tema, nós cuidamos do resto: conteúdo, capa e guias de monetização.
+              O <span className="font-bold text-white">EbookStudio</span> usa IA para gerar eBooks profissionais completos em minutos. Você escolhe o tema, nós cuidamos do resto: conteúdo, capa e guias de monetização.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
