@@ -31,6 +31,13 @@
 - [ ] Execução automática dos agendamentos via cron job (requer configuração de servidor)
 
 ## In Progress
+- [x] Campo de número de vendas nas publicações (salesCount)
+- [x] Dashboard financeiro com ranking de eBooks (/analytics)
+- [x] Ranking por lucro, ROI, vendas e receita
+- [x] Totalizadores gerais (receita total, lucro total, etc.)
+- [x] Tabela de ranking com badges (top 3)
+- [ ] Adicionar campo salesCount no formulário de publicações
+- [ ] Badges de vendas nos cards de eBooks do Dashboard
 - [ ] Tutoriais detalhados por plataforma (modal/página separada)
 - [ ] Botão "Ver Tutorial Completo" em cada guia
 - [ ] Requisitos, documentação e passo a passo com exemplos

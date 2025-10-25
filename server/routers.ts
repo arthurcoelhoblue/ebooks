@@ -343,6 +343,11 @@ export const appRouter = router({
   }),
 
   publications: router({
+    // List all publications
+    listAll: protectedProcedure.query(async ({ ctx }) => {
+      // Return empty array for now - will be populated when publications exist
+      return [];
+    }),
     // Get publications for an ebook
     getByEbookId: protectedProcedure
       .input((val: unknown) => {

@@ -124,6 +124,7 @@ export const publications = mysqlTable("publications", {
   trafficCost: varchar("trafficCost", { length: 20 }).default("0"),
   otherCosts: varchar("otherCosts", { length: 20 }).default("0"),
   revenue: varchar("revenue", { length: 20 }).default("0"),
+  salesCount: int("salesCount").default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

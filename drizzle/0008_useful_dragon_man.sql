@@ -1,0 +1,1 @@
+ALTER TABLE `publications` ADD `salesCount` int DEFAULT 0;
