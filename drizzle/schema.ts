@@ -25,4 +25,40 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * eBooks table - stores generated ebooks metadata
+ */
+export const ebooks = mysqlTable("ebooks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  theme: text("theme").notNull(),
+  author: varchar("author", { length: 255 }).notNull(),
+  status: mysqlEnum("status", ["processing", "completed", "failed"]).default("processing").notNull(),
+  epubUrl: text("epubUrl"),
+  pdfUrl: text("pdfUrl"),
+  coverUrl: text("coverUrl"),
+  content: text("content"),
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Ebook = typeof ebooks.$inferSelect;
+export type InsertEbook = typeof ebooks.$inferInsert;
+
+/**
+ * Publishing guides table - stores monetization guides for each platform
+ */
+export const publishingGuides = mysqlTable("publishingGuides", {
+  id: int("id").autoincrement().primaryKey(),
+  ebookId: int("ebookId").notNull(),
+  platform: mysqlEnum("platform", ["amazon_kdp", "hotmart", "eduzz", "monetizze"]).notNull(),
+  completed: int("completed").default(0).notNull(), // boolean as tinyint
+  checklist: text("checklist"), // JSON string of checklist items
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PublishingGuide = typeof publishingGuides.$inferSelect;
+export type InsertPublishingGuide = typeof publishingGuides.$inferInsert;

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, ebooks, InsertEbook, publishingGuides, InsertPublishingGuide } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,49 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// eBook queries
+export async function createEbook(ebook: InsertEbook) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(ebooks).values(ebook);
+  return result[0].insertId;
+}
+
+export async function getEbookById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(ebooks).where(eq(ebooks.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getEbooksByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(ebooks).where(eq(ebooks.userId, userId)).orderBy(ebooks.createdAt);
+}
+
+export async function updateEbookStatus(id: number, status: "processing" | "completed" | "failed", data?: Partial<InsertEbook>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(ebooks).set({ status, ...data, updatedAt: new Date() }).where(eq(ebooks.id, id));
+}
+
+// Publishing guides queries
+export async function createPublishingGuide(guide: InsertPublishingGuide) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(publishingGuides).values(guide);
+  return result[0].insertId;
+}
+
+export async function getPublishingGuidesByEbookId(ebookId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(publishingGuides).where(eq(publishingGuides.ebookId, ebookId));
+}
+
+export async function updatePublishingGuide(id: number, data: Partial<InsertPublishingGuide>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(publishingGuides).set({ ...data, updatedAt: new Date() }).where(eq(publishingGuides.id, id));
+}
