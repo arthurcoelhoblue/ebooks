@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, ebooks, InsertEbook, publishingGuides, InsertPublishingGuide, schedules, InsertSchedule, ebookMetadata, InsertEbookMetadata } from "../drizzle/schema";
+import { InsertUser, users, ebooks, InsertEbook, publishingGuides, InsertPublishingGuide, schedules, InsertSchedule, ebookMetadata, InsertEbookMetadata, publications, InsertPublication } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -188,4 +188,42 @@ export async function updateEbookMetadata(id: number, data: Partial<InsertEbookM
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(ebookMetadata).set({ ...data, updatedAt: new Date() }).where(eq(ebookMetadata.id, id));
+}
+
+// Publications
+export async function getPublicationsByEbookId(ebookId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(publications).where(eq(publications.ebookId, ebookId));
+}
+
+export async function createPublication(data: InsertPublication) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(publications).values(data) as any;
+  return Number(result.insertId);
+}
+
+export async function deletePublication(ebookId: number, platform: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(publications).where(
+    and(
+      eq(publications.ebookId, ebookId),
+      eq(publications.platform, platform as any)
+    )
+  );
+}
+
+export async function updatePublication(ebookId: number, platform: string, data: Partial<InsertPublication>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(publications)
+    .set(data)
+    .where(
+      and(
+        eq(publications.ebookId, ebookId),
+        eq(publications.platform, platform as any)
+      )
+    );
 }

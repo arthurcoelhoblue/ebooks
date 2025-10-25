@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
-import { BookOpen, Calendar, Download, FileText, Loader2, Plus, Sparkles } from "lucide-react";
+import { BookOpen, Calendar, Download, FileText, Loader2, Plus, Sparkles, Clock, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -19,6 +19,17 @@ export default function Dashboard() {
   const [numChapters, setNumChapters] = useState(5);
 
   const { data: ebooks, isLoading, refetch } = trpc.ebooks.list.useQuery();
+  const { data: allPublications } = trpc.publications.getByEbookId.useQuery({ ebookId: 0 }); // Placeholder
+
+  const getPlatformBadge = (platform: string) => {
+    const configs: Record<string, { label: string; color: string }> = {
+      amazon_kdp: { label: "KDP", color: "bg-orange-100 text-orange-700" },
+      hotmart: { label: "Hot", color: "bg-blue-100 text-blue-700" },
+      eduzz: { label: "Edz", color: "bg-green-100 text-green-700" },
+      monetizze: { label: "Mon", color: "bg-purple-100 text-purple-700" },
+    };
+    return configs[platform] || { label: platform, color: "bg-gray-100 text-gray-700" };
+  };
 
   // Auto-refresh every 5 seconds if there are processing ebooks
   useEffect(() => {

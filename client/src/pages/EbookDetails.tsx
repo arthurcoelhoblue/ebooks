@@ -1,8 +1,13 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import {
   ArrowLeft,
@@ -13,70 +18,20 @@ import {
   ExternalLink,
   FileText,
   Sparkles,
+  Plus,
+  X,
 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Link, useParams } from "wouter";
 
-// Guias de publicação para cada plataforma
-const GUIDES = {
-  amazon_kdp: {
-    title: "Amazon Kindle Direct Publishing (KDP)",
-    description: "Publique seu eBook na maior plataforma de livros digitais do mundo",
-    link: "https://kdp.amazon.com",
-    steps: [
-      "Criar conta no KDP",
-      "Iniciar novo projeto de eBook",
-      "Preencher metadados (use os campos abaixo)",
-      "Escolher palavras-chave",
-      "Fazer upload do arquivo EPUB",
-      "Fazer upload da capa",
-      "Definir preço e royalties",
-      "Publicar",
-    ],
-  },
-  hotmart: {
-    title: "Hotmart",
-    description: "Venda seu eBook no maior marketplace de produtos digitais do Brasil",
-    link: "https://hotmart.com",
-    steps: [
-      "Criar conta gratuita",
-      "Cadastrar produto",
-      "Preencher informações (use os campos abaixo)",
-      "Upload do arquivo PDF",
-      "Configurar proteção DRM",
-      "Definir preço",
-      "Criar página de vendas",
-      "Ativar programa de afiliados",
-      "Publicar e promover",
-    ],
-  },
-  eduzz: {
-    title: "Eduzz",
-    description: "Plataforma brasileira com as menores taxas do mercado",
-    link: "https://eduzz.com",
-    steps: [
-      "Criar conta gratuita",
-      "Cadastrar produto",
-      "Upload do arquivo",
-      "Configurar produto (use os campos abaixo)",
-      "Definir preço",
-      "Configurar afiliados",
-      "Publicar",
-    ],
-  },
-  monetizze: {
-    title: "Monetizze",
-    description: "Plataforma completa para venda de produtos digitais",
-    link: "https://monetizze.com.br",
-    steps: [
-      "Criar conta",
-      "Cadastrar produto",
-      "Upload e configuração (use os campos abaixo)",
-      "Definir preço e comissões",
-      "Publicar",
-    ],
-  },
-};
+// Platform configurations
+const PLATFORMS = [
+  { value: "amazon_kdp", label: "Amazon KDP", color: "bg-orange-100 text-orange-700 border-orange-200" },
+  { value: "hotmart", label: "Hotmart", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  { value: "eduzz", label: "Eduzz", color: "bg-green-100 text-green-700 border-green-200" },
+  { value: "monetizze", label: "Monetizze", color: "bg-purple-100 text-purple-700 border-purple-200" },
+];
 
 function CopyField({ label, value }: { label: string; value: string }) {
   const handleCopy = () => {
@@ -105,6 +60,39 @@ export default function EbookDetails() {
 
   const { data: ebook, isLoading: ebookLoading } = trpc.ebooks.getById.useQuery({ id: ebookId });
   const { data: metadata, isLoading: metadataLoading } = trpc.metadata.getByEbookId.useQuery({ ebookId });
+  const { data: publications, refetch: refetchPublications } = trpc.publications.getByEbookId.useQuery({ ebookId });
+
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<"amazon_kdp" | "hotmart" | "eduzz" | "monetizze">("amazon_kdp");
+  const [publicationUrl, setPublicationUrl] = useState("");
+
+  const publishMutation = trpc.publications.create.useMutation({
+    onSuccess: () => {
+      toast.success("Publicação registrada!");
+      setShowPublishDialog(false);
+      setPublicationUrl("");
+      refetchPublications();
+    },
+  });
+
+  const unpublishMutation = trpc.publications.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Publicação removida!");
+      refetchPublications();
+    },
+  });
+
+  const getPlatformConfig = (platform: string) => {
+    return PLATFORMS.find(p => p.value === platform);
+  };
+
+  const isPublishedOn = (platform: string) => {
+    return publications?.some(p => p.platform === platform);
+  };
+
+  const getPublicationUrl = (platform: string) => {
+    return publications?.find(p => p.platform === platform)?.publicationUrl;
+  };
 
   if (ebookLoading || metadataLoading) {
     return (
@@ -136,9 +124,8 @@ export default function EbookDetails() {
         </header>
         <main className="container py-12">
           <Card>
-            <CardContent className="py-16 text-center">
-              <h2 className="text-2xl font-bold mb-2">eBook não encontrado</h2>
-              <p className="text-muted-foreground">O eBook que você está procurando não existe ou foi removido.</p>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">eBook não encontrado</p>
             </CardContent>
           </Card>
         </main>
@@ -149,149 +136,169 @@ export default function EbookDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container py-4">
-          <Link href="/dashboard">
-            <Button variant="ghost">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar para Dashboard
-            </Button>
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link href="/dashboard">
+              <Button variant="ghost">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar ao Dashboard
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="container py-12">
         <div className="max-w-6xl mx-auto space-y-8">
-          {/* eBook Info */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-start gap-6">
-                {ebook.coverUrl && (
-                  <img
-                    src={ebook.coverUrl}
-                    alt={ebook.title}
-                    className="w-48 h-64 object-cover rounded-lg shadow-lg"
-                  />
-                )}
-                <div className="flex-1">
-                  <CardTitle className="text-3xl mb-2">{ebook.title}</CardTitle>
-                  <CardDescription className="text-lg mb-4">por {ebook.author}</CardDescription>
-                  <div className="flex gap-3">
-                    {ebook.epubUrl && (
-                      <Button variant="outline" asChild>
-                        <a href={ebook.epubUrl} target="_blank" rel="noopener noreferrer">
-                          <BookOpen className="w-4 h-4 mr-2" />
-                          Download EPUB
-                        </a>
-                      </Button>
-                    )}
-                    {ebook.pdfUrl && (
-                      <Button variant="outline" asChild>
-                        <a href={ebook.pdfUrl} target="_blank" rel="noopener noreferrer">
-                          <FileText className="w-4 h-4 mr-2" />
-                          Download PDF
-                        </a>
-                      </Button>
-                    )}
-                  </div>
+          {/* eBook Header */}
+          <div className="flex items-start gap-6">
+            {ebook.coverUrl && (
+              <img
+                src={ebook.coverUrl}
+                alt={ebook.title}
+                className="w-48 h-64 object-cover rounded-lg shadow-lg"
+              />
+            )}
+            <div className="flex-1 space-y-4">
+              <div>
+                <h1 className="text-4xl font-bold">{ebook.title}</h1>
+                <p className="text-xl text-muted-foreground mt-2">por {ebook.author}</p>
+              </div>
+
+              {/* Publication Status */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium">Status de Publicação:</span>
+                  {publications && publications.length > 0 ? (
+                    publications.map(pub => {
+                      const config = getPlatformConfig(pub.platform);
+                      return (
+                        <Badge key={pub.id} className={config?.color} variant="outline">
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          {config?.label}
+                          <button
+                            onClick={() => unpublishMutation.mutate({ ebookId, platform: pub.platform })}
+                            className="ml-2 hover:opacity-70"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      );
+                    })
+                  ) : (
+                    <span className="text-sm text-muted-foreground">Não publicado</span>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowPublishDialog(true)}
+                    className="gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Marcar Publicação
+                  </Button>
                 </div>
               </div>
-            </CardHeader>
-          </Card>
+
+              {/* Download Links */}
+              <div className="flex gap-3">
+                {ebook.epubUrl && (
+                  <Button variant="default" asChild>
+                    <a href={ebook.epubUrl} target="_blank" rel="noopener noreferrer">
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Download EPUB
+                    </a>
+                  </Button>
+                )}
+                {ebook.pdfUrl && (
+                  <Button variant="outline" asChild>
+                    <a href={ebook.pdfUrl} target="_blank" rel="noopener noreferrer">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Metadata Section */}
           {metadata && (
-            <Card className="border-2 border-purple-200">
+            <Card>
               <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-6 h-6 text-purple-600" />
-                  <CardTitle className="text-2xl">Metadados Otimizados</CardTitle>
-                </div>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  Metadados Otimizados para Publicação
+                </CardTitle>
                 <CardDescription>
                   Copie e cole estes campos nas plataformas de publicação
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <CopyField label="Título Otimizado" value={metadata.optimizedTitle || ebook.title} />
+                <CopyField label="Título" value={metadata.optimizedTitle || ebook.title} />
+                <CopyField label="Descrição" value={metadata.longDescription || metadata.shortDescription || ""} />
                 <CopyField
-                  label="Descrição Curta"
-                  value={metadata.shortDescription || "Descrição não disponível"}
+                  label="Palavras-chave"
+                  value={metadata.keywords ? JSON.parse(metadata.keywords).join(", ") : ""}
                 />
                 <CopyField
-                  label="Descrição Longa"
-                  value={metadata.longDescription || "Descrição não disponível"}
+                  label="Categorias"
+                  value={metadata.categories ? JSON.parse(metadata.categories).join(", ") : ""}
                 />
-                <CopyField
-                  label="Palavras-chave (separadas por vírgula)"
-                  value={metadata.keywords?.join(", ") || ""}
-                />
-                <CopyField label="Categorias" value={metadata.categories?.join(", ") || ""} />
-                <CopyField label="Preço Sugerido" value={metadata.suggestedPrice || "R$ 27,00"} />
-                <CopyField
-                  label="Público-alvo"
-                  value={metadata.targetAudience || "Público geral interessado no tema"}
-                />
+                <CopyField label="Preço Sugerido" value={metadata.suggestedPrice || "R$ 29,90"} />
               </CardContent>
             </Card>
           )}
-
-          {/* Publishing Guides */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Guias de Publicação</CardTitle>
-              <CardDescription>
-                Siga os passos abaixo para publicar seu eBook nas principais plataformas
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="amazon_kdp" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="amazon_kdp">Amazon KDP</TabsTrigger>
-                  <TabsTrigger value="hotmart">Hotmart</TabsTrigger>
-                  <TabsTrigger value="eduzz">Eduzz</TabsTrigger>
-                  <TabsTrigger value="monetizze">Monetizze</TabsTrigger>
-                </TabsList>
-
-                {Object.entries(GUIDES).map(([key, guide]) => (
-                  <TabsContent key={key} value={key} className="space-y-4">
-                    <div className="mb-6">
-                      <h3 className="text-xl font-semibold mb-2">{guide.title}</h3>
-                      <p className="text-muted-foreground mb-4">{guide.description}</p>
-                      <Button asChild>
-                        <a href={guide.link} target="_blank" rel="noopener noreferrer">
-                          Acessar {guide.title}
-                          <ExternalLink className="w-4 h-4 ml-2" />
-                        </a>
-                      </Button>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="font-semibold">Checklist de Publicação:</h4>
-                      {guide.steps.map((step, index) => (
-                        <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                          <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm">
-                            {index + 1}. {step}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-sm text-blue-900">
-                        <strong>Dica:</strong> Use os metadados otimizados acima para preencher os campos nas
-                        plataformas. Basta clicar em "Copiar" e colar no campo correspondente.
-                      </p>
-                    </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </CardContent>
-          </Card>
         </div>
       </main>
+
+      {/* Publish Dialog */}
+      <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Marcar como Publicado</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Plataforma</Label>
+              <Select value={selectedPlatform} onValueChange={(v: any) => setSelectedPlatform(v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PLATFORMS.filter(p => !isPublishedOn(p.value)).map(platform => (
+                    <SelectItem key={platform.value} value={platform.value}>
+                      {platform.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>URL da Publicação (opcional)</Label>
+              <Input
+                placeholder="https://..."
+                value={publicationUrl}
+                onChange={(e) => setPublicationUrl(e.target.value)}
+              />
+            </div>
+            <Button
+              className="w-full"
+              onClick={() => publishMutation.mutate({
+                ebookId,
+                platform: selectedPlatform,
+                publicationUrl: publicationUrl || undefined,
+                notes: undefined,
+              })}
+              disabled={publishMutation.isPending}
+            >
+              {publishMutation.isPending ? "Salvando..." : "Marcar como Publicado"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-

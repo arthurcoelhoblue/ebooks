@@ -107,3 +107,21 @@ export const ebookMetadata = mysqlTable("ebookMetadata", {
 
 export type EbookMetadata = typeof ebookMetadata.$inferSelect;
 export type InsertEbookMetadata = typeof ebookMetadata.$inferInsert;
+
+/**
+ * Publications table - tracks where each ebook has been published
+ */
+export const publications = mysqlTable("publications", {
+  id: int("id").autoincrement().primaryKey(),
+  ebookId: int("ebookId").notNull(),
+  platform: mysqlEnum("platform", ["amazon_kdp", "hotmart", "eduzz", "monetizze"]).notNull(),
+  published: int("published").default(1).notNull(), // boolean as tinyint
+  publicationUrl: text("publicationUrl"),
+  publishedAt: timestamp("publishedAt").defaultNow().notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Publication = typeof publications.$inferSelect;
+export type InsertPublication = typeof publications.$inferInsert;

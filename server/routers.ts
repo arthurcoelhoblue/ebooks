@@ -340,6 +340,75 @@ export const appRouter = router({
       }),
   }),
 
+  publications: router({
+    // Get publications for an ebook
+    getByEbookId: protectedProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "ebookId" in val && typeof val.ebookId === "number") {
+          return { ebookId: val.ebookId };
+        }
+        throw new Error("Invalid input");
+      })
+      .query(async ({ input }) => {
+        const { getPublicationsByEbookId } = await import("./db");
+        return getPublicationsByEbookId(input.ebookId);
+      }),
+
+    // Mark as published
+    create: protectedProcedure
+      .input((val: unknown) => {
+        if (
+          typeof val === "object" &&
+          val !== null &&
+          "ebookId" in val &&
+          typeof val.ebookId === "number" &&
+          "platform" in val &&
+          typeof val.platform === "string"
+        ) {
+          return {
+            ebookId: val.ebookId,
+            platform: val.platform as "amazon_kdp" | "hotmart" | "eduzz" | "monetizze",
+            publicationUrl: "publicationUrl" in val && typeof val.publicationUrl === "string" ? val.publicationUrl : undefined,
+            notes: "notes" in val && typeof val.notes === "string" ? val.notes : undefined,
+          };
+        }
+        throw new Error("Invalid input");
+      })
+      .mutation(async ({ input }) => {
+        const { createPublication } = await import("./db");
+        const id = await createPublication({
+          ebookId: input.ebookId,
+          platform: input.platform,
+          publicationUrl: input.publicationUrl,
+          notes: input.notes,
+          published: 1,
+          publishedAt: new Date(),
+        });
+        return { id };
+      }),
+
+    // Remove publication
+    delete: protectedProcedure
+      .input((val: unknown) => {
+        if (
+          typeof val === "object" &&
+          val !== null &&
+          "ebookId" in val &&
+          typeof val.ebookId === "number" &&
+          "platform" in val &&
+          typeof val.platform === "string"
+        ) {
+          return { ebookId: val.ebookId, platform: val.platform };
+        }
+        throw new Error("Invalid input");
+      })
+      .mutation(async ({ input }) => {
+        const { deletePublication } = await import("./db");
+        await deletePublication(input.ebookId, input.platform);
+        return { success: true };
+      }),
+  }),
+
   metadata: router({
     // Get metadata for an ebook
     getByEbookId: protectedProcedure

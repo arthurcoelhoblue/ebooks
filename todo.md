@@ -42,4 +42,10 @@
 - [x] Contador de eBooks em processamento no Dashboard
 - [x] Auto-refresh a cada 5s quando há eBooks sendo gerados
 - [x] Indicador visual na página de Agendamentos
+- [x] Sistema completo de controle de publicações
+- [x] Marcar eBooks como publicados em múltiplas plataformas
+- [x] Badges coloridos mostrando onde cada eBook foi publicado
+- [x] Dialog para adicionar publicações com URL
+- [x] Remover publicações com um clique
+- [x] Tabela publications no banco de dados
 
