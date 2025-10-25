@@ -53,6 +53,16 @@ export default function Schedules() {
     },
   });
 
+  const triggerMutation = trpc.schedules.triggerNow.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
   const resetForm = () => {
     setName("");
     setFrequency("daily");
@@ -322,13 +332,30 @@ export default function Schedules() {
                           </div>
                         </CardDescription>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteMutation.mutate({ id: schedule.id })}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => triggerMutation.mutate({ scheduleId: schedule.id })}
+                          disabled={triggerMutation.isPending}
+                        >
+                          {triggerMutation.isPending ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 mr-2" />
+                              Gerar Agora
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deleteMutation.mutate({ id: schedule.id })}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>

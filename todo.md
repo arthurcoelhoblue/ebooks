@@ -27,7 +27,11 @@
 - [x] Sugestões de categorias por tema
 
 ## Pending Features
-- [ ] Sistema de filas para processamento em background (cron job)
 - [ ] Dashboard com estatísticas de eBooks gerados
-- [ ] Execução automática dos agendamentos (requer worker/cron)
+- [ ] Execução automática dos agendamentos via cron job (requer configuração de servidor)
+
+## Recently Added
+- [x] Worker de processamento de agendamentos (schedulerWorker.ts)
+- [x] Botão "Gerar Agora" para trigger manual de agendamentos
+- [x] Processamento assíncrono de geração de eBooks
 

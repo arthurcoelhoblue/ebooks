@@ -295,6 +295,28 @@ export const appRouter = router({
         const { findTrendingTopics } = await import("./trendingTopics");
         return findTrendingTopics(input.category, input.count);
       }),
+
+    // Trigger schedule manually (for testing)
+    triggerNow: protectedProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "scheduleId" in val && typeof val.scheduleId === "number") {
+          return { scheduleId: val.scheduleId };
+        }
+        throw new Error("Invalid input");
+      })
+      .mutation(async ({ input, ctx }) => {
+        const { getScheduleById } = await import("./db");
+        const schedule = await getScheduleById(input.scheduleId);
+        
+        if (!schedule || schedule.userId !== ctx.user.id) {
+          throw new Error("Schedule not found");
+        }
+
+        const { triggerScheduleNow } = await import("./schedulerWorker");
+        await triggerScheduleNow(input.scheduleId);
+        
+        return { success: true, message: "eBook sendo gerado! Aguarde alguns minutos." };
+      }),
   }),
 
   metadata: router({
