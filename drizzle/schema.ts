@@ -62,3 +62,47 @@ export const publishingGuides = mysqlTable("publishingGuides", {
 
 export type PublishingGuide = typeof publishingGuides.$inferSelect;
 export type InsertPublishingGuide = typeof publishingGuides.$inferInsert;
+
+/**
+ * Schedules table - stores automatic ebook generation schedules
+ */
+export const schedules = mysqlTable("schedules", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  frequency: mysqlEnum("frequency", ["daily", "weekly", "monthly"]).notNull(),
+  totalEbooks: int("totalEbooks").notNull(),
+  generatedCount: int("generatedCount").default(0).notNull(),
+  themeMode: mysqlEnum("themeMode", ["custom_list", "single_theme", "trending"]).notNull(),
+  themes: text("themes"), // JSON array of themes for custom_list mode
+  singleTheme: text("singleTheme"), // Single theme for single_theme mode
+  author: varchar("author", { length: 255 }).notNull(),
+  active: int("active").default(1).notNull(), // boolean as tinyint
+  lastRunAt: timestamp("lastRunAt"),
+  nextRunAt: timestamp("nextRunAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Schedule = typeof schedules.$inferSelect;
+export type InsertSchedule = typeof schedules.$inferInsert;
+
+/**
+ * Ebook metadata table - stores SEO-optimized metadata for publishing
+ */
+export const ebookMetadata = mysqlTable("ebookMetadata", {
+  id: int("id").autoincrement().primaryKey(),
+  ebookId: int("ebookId").notNull(),
+  optimizedTitle: varchar("optimizedTitle", { length: 255 }),
+  shortDescription: text("shortDescription"),
+  longDescription: text("longDescription"),
+  keywords: text("keywords"), // JSON array of keywords
+  categories: text("categories"), // JSON array of categories
+  suggestedPrice: varchar("suggestedPrice", { length: 50 }),
+  targetAudience: text("targetAudience"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EbookMetadata = typeof ebookMetadata.$inferSelect;
+export type InsertEbookMetadata = typeof ebookMetadata.$inferInsert;

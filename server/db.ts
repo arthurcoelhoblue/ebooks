@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, ebooks, InsertEbook, publishingGuides, InsertPublishingGuide } from "../drizzle/schema";
+import { InsertUser, users, ebooks, InsertEbook, publishingGuides, InsertPublishingGuide, schedules, InsertSchedule, ebookMetadata, InsertEbookMetadata } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -134,4 +134,58 @@ export async function updatePublishingGuide(id: number, data: Partial<InsertPubl
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(publishingGuides).set({ ...data, updatedAt: new Date() }).where(eq(publishingGuides.id, id));
+}
+
+// Schedule queries
+export async function createSchedule(schedule: InsertSchedule) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(schedules).values(schedule);
+  return result[0].insertId;
+}
+
+export async function getSchedulesByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(schedules).where(eq(schedules.userId, userId)).orderBy(schedules.createdAt);
+}
+
+export async function getScheduleById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(schedules).where(eq(schedules.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateSchedule(id: number, data: Partial<InsertSchedule>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(schedules).set({ ...data, updatedAt: new Date() }).where(eq(schedules.id, id));
+}
+
+export async function deleteSchedule(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(schedules).where(eq(schedules.id, id));
+}
+
+// Ebook metadata queries
+export async function createEbookMetadata(metadata: InsertEbookMetadata) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(ebookMetadata).values(metadata);
+  return result[0].insertId;
+}
+
+export async function getEbookMetadataByEbookId(ebookId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(ebookMetadata).where(eq(ebookMetadata.ebookId, ebookId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateEbookMetadata(id: number, data: Partial<InsertEbookMetadata>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(ebookMetadata).set({ ...data, updatedAt: new Date() }).where(eq(ebookMetadata.id, id));
 }

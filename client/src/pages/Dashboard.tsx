@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
-import { BookOpen, Download, FileText, Loader2, Plus, Sparkles } from "lucide-react";
+import { BookOpen, Calendar, Download, FileText, Loader2, Plus, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -68,6 +68,13 @@ export default function Dashboard() {
               <h2 className="text-3xl font-bold">Meus eBooks</h2>
               <p className="text-muted-foreground mt-2">Gerencie seus eBooks criados com IA</p>
             </div>
+            <div className="flex gap-3">
+              <Link href="/schedules">
+                <Button variant="outline" size="lg" className="gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Agendamentos
+                </Button>
+              </Link>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="lg" className="gap-2">
@@ -134,6 +141,7 @@ export default function Dashboard() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            </div>
           </div>
 
           {/* eBooks Grid */}

@@ -1,11 +1,19 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, BookOpen, CheckCircle2, Download, ExternalLink, FileText } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  CheckCircle2,
+  Copy,
+  Download,
+  ExternalLink,
+  FileText,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Link, useParams } from "wouter";
 
@@ -14,148 +22,81 @@ const GUIDES = {
   amazon_kdp: {
     title: "Amazon Kindle Direct Publishing (KDP)",
     description: "Publique seu eBook na maior plataforma de livros digitais do mundo",
+    link: "https://kdp.amazon.com",
     steps: [
-      {
-        title: "Criar conta no KDP",
-        description: "Acesse kdp.amazon.com e crie uma conta gratuita. Você precisará fornecer informações fiscais.",
-        link: "https://kdp.amazon.com",
-      },
-      {
-        title: "Iniciar novo projeto de eBook",
-        description: "No painel do KDP, clique em 'Create' e escolha 'Kindle eBook'.",
-      },
-      {
-        title: "Preencher metadados",
-        description: "Título, autor, descrição (use palavras-chave relevantes), idioma (Português), e categorias.",
-      },
-      {
-        title: "Escolher palavras-chave",
-        description: "Selecione 7 palavras-chave que descrevem seu eBook. Pesquise termos populares no seu nicho.",
-      },
-      {
-        title: "Fazer upload do arquivo EPUB",
-        description: "Faça o upload do arquivo EPUB gerado pela nossa plataforma. Use a ferramenta de preview para verificar.",
-      },
-      {
-        title: "Fazer upload da capa",
-        description: "Faça o upload da imagem de capa (mínimo 1600x2560 pixels).",
-      },
-      {
-        title: "Definir preço e royalties",
-        description: "Escolha entre 35% ou 70% de royalty. Para 70%, o preço deve estar entre $2.99 e $9.99.",
-      },
-      {
-        title: "Publicar",
-        description: "Revise tudo e clique em 'Publish'. Seu eBook estará disponível em até 72 horas.",
-      },
+      "Criar conta no KDP",
+      "Iniciar novo projeto de eBook",
+      "Preencher metadados (use os campos abaixo)",
+      "Escolher palavras-chave",
+      "Fazer upload do arquivo EPUB",
+      "Fazer upload da capa",
+      "Definir preço e royalties",
+      "Publicar",
     ],
   },
   hotmart: {
     title: "Hotmart",
     description: "Venda seu eBook no maior marketplace de produtos digitais do Brasil",
+    link: "https://hotmart.com",
     steps: [
-      {
-        title: "Criar conta gratuita",
-        description: "Acesse hotmart.com e crie uma conta de produtor gratuitamente.",
-        link: "https://hotmart.com",
-      },
-      {
-        title: "Cadastrar produto",
-        description: "Clique em 'Criar Produto' e escolha a opção 'eBook'.",
-      },
-      {
-        title: "Preencher informações",
-        description: "Nome do produto (título do eBook), descrição persuasiva e categoria.",
-      },
-      {
-        title: "Upload do arquivo PDF",
-        description: "Faça o upload do arquivo PDF gerado pela nossa plataforma.",
-      },
-      {
-        title: "Configurar proteção DRM",
-        description: "Ative a proteção DRM e escolha se permite impressão e cópia.",
-      },
-      {
-        title: "Definir preço",
-        description: "Defina o preço em reais. A Hotmart cobra 9.9% + R$1 por venda.",
-      },
-      {
-        title: "Criar página de vendas",
-        description: "Adicione a capa do eBook, crie uma descrição atraente e defina garantias.",
-      },
-      {
-        title: "Ativar programa de afiliados",
-        description: "Configure comissões para afiliados (recomendado: 50%) para aumentar as vendas.",
-      },
-      {
-        title: "Publicar e promover",
-        description: "Clique em 'Publicar' e use as ferramentas de marketing da Hotmart.",
-      },
+      "Criar conta gratuita",
+      "Cadastrar produto",
+      "Preencher informações (use os campos abaixo)",
+      "Upload do arquivo PDF",
+      "Configurar proteção DRM",
+      "Definir preço",
+      "Criar página de vendas",
+      "Ativar programa de afiliados",
+      "Publicar e promover",
     ],
   },
   eduzz: {
     title: "Eduzz",
     description: "Plataforma brasileira com as menores taxas do mercado",
+    link: "https://eduzz.com",
     steps: [
-      {
-        title: "Criar conta gratuita",
-        description: "Acesse eduzz.com e crie uma conta de produtor.",
-        link: "https://eduzz.com",
-      },
-      {
-        title: "Cadastrar produto",
-        description: "No painel, clique em 'Novo Produto' e escolha 'eBook/PDF'.",
-      },
-      {
-        title: "Upload do arquivo",
-        description: "Faça o upload do arquivo PDF do seu eBook.",
-      },
-      {
-        title: "Configurar produto",
-        description: "Preencha título, descrição, categoria e adicione a capa.",
-      },
-      {
-        title: "Definir preço",
-        description: "A Eduzz cobra apenas 4.9% + R$2.49 por venda direta.",
-      },
-      {
-        title: "Configurar afiliados",
-        description: "Ative o programa de afiliados para aumentar suas vendas.",
-      },
-      {
-        title: "Publicar",
-        description: "Revise e publique seu produto.",
-      },
+      "Criar conta gratuita",
+      "Cadastrar produto",
+      "Upload do arquivo",
+      "Configurar produto (use os campos abaixo)",
+      "Definir preço",
+      "Configurar afiliados",
+      "Publicar",
     ],
   },
   monetizze: {
     title: "Monetizze",
     description: "Plataforma completa para venda de produtos digitais",
+    link: "https://monetizze.com.br",
     steps: [
-      {
-        title: "Criar conta",
-        description: "Acesse monetizze.com.br e crie sua conta de produtor.",
-        link: "https://monetizze.com.br",
-      },
-      {
-        title: "Cadastrar produto",
-        description: "Clique em 'Adicionar Produto' e escolha o tipo 'eBook'.",
-      },
-      {
-        title: "Upload e configuração",
-        description: "Faça o upload do PDF e preencha as informações do produto.",
-      },
-      {
-        title: "Definir preço e comissões",
-        description: "Configure o preço e as comissões para afiliados.",
-      },
-      {
-        title: "Publicar",
-        description: "Finalize e publique seu eBook.",
-      },
+      "Criar conta",
+      "Cadastrar produto",
+      "Upload e configuração (use os campos abaixo)",
+      "Definir preço e comissões",
+      "Publicar",
     ],
   },
 };
+
+function CopyField({ label, value }: { label: string; value: string }) {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    toast.success(`${label} copiado!`);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium">{label}</label>
+        <Button variant="ghost" size="sm" onClick={handleCopy} className="h-8 gap-2">
+          <Copy className="w-4 h-4" />
+          Copiar
+        </Button>
+      </div>
+      <div className="p-3 bg-muted rounded-lg text-sm font-mono break-words">{value}</div>
+    </div>
+  );
+}
 
 export default function EbookDetails() {
   const params = useParams();
@@ -163,8 +104,9 @@ export default function EbookDetails() {
   const { user } = useAuth();
 
   const { data: ebook, isLoading: ebookLoading } = trpc.ebooks.getById.useQuery({ id: ebookId });
+  const { data: metadata, isLoading: metadataLoading } = trpc.metadata.getByEbookId.useQuery({ ebookId });
 
-  if (ebookLoading) {
+  if (ebookLoading || metadataLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
         <header className="border-b bg-white/80 backdrop-blur-sm">
@@ -258,12 +200,48 @@ export default function EbookDetails() {
             </CardHeader>
           </Card>
 
+          {/* Metadata Section */}
+          {metadata && (
+            <Card className="border-2 border-purple-200">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-purple-600" />
+                  <CardTitle className="text-2xl">Metadados Otimizados</CardTitle>
+                </div>
+                <CardDescription>
+                  Copie e cole estes campos nas plataformas de publicação
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <CopyField label="Título Otimizado" value={metadata.optimizedTitle || ebook.title} />
+                <CopyField
+                  label="Descrição Curta"
+                  value={metadata.shortDescription || "Descrição não disponível"}
+                />
+                <CopyField
+                  label="Descrição Longa"
+                  value={metadata.longDescription || "Descrição não disponível"}
+                />
+                <CopyField
+                  label="Palavras-chave (separadas por vírgula)"
+                  value={metadata.keywords?.join(", ") || ""}
+                />
+                <CopyField label="Categorias" value={metadata.categories?.join(", ") || ""} />
+                <CopyField label="Preço Sugerido" value={metadata.suggestedPrice || "R$ 27,00"} />
+                <CopyField
+                  label="Público-alvo"
+                  value={metadata.targetAudience || "Público geral interessado no tema"}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Publishing Guides */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Guias de Monetização</CardTitle>
+              <CardTitle className="text-2xl">Guias de Publicação</CardTitle>
               <CardDescription>
-                Siga os passos abaixo para publicar e vender seu eBook nas principais plataformas
+                Siga os passos abaixo para publicar seu eBook nas principais plataformas
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -279,33 +257,32 @@ export default function EbookDetails() {
                   <TabsContent key={key} value={key} className="space-y-4">
                     <div className="mb-6">
                       <h3 className="text-xl font-semibold mb-2">{guide.title}</h3>
-                      <p className="text-muted-foreground">{guide.description}</p>
+                      <p className="text-muted-foreground mb-4">{guide.description}</p>
+                      <Button asChild>
+                        <a href={guide.link} target="_blank" rel="noopener noreferrer">
+                          Acessar {guide.title}
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </a>
+                      </Button>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold">Checklist de Publicação:</h4>
                       {guide.steps.map((step, index) => (
-                        <Card key={index}>
-                          <CardHeader>
-                            <div className="flex items-start gap-4">
-                              <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold flex-shrink-0">
-                                {index + 1}
-                              </div>
-                              <div className="flex-1">
-                                <CardTitle className="text-lg mb-2">{step.title}</CardTitle>
-                                <CardDescription>{step.description}</CardDescription>
-                                {step.link && (
-                                  <Button variant="link" className="px-0 mt-2" asChild>
-                                    <a href={step.link} target="_blank" rel="noopener noreferrer">
-                                      Acessar plataforma
-                                      <ExternalLink className="w-4 h-4 ml-2" />
-                                    </a>
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          </CardHeader>
-                        </Card>
+                        <div key={index} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                          <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">
+                            {index + 1}. {step}
+                          </span>
+                        </div>
                       ))}
+                    </div>
+
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-900">
+                        <strong>Dica:</strong> Use os metadados otimizados acima para preencher os campos nas
+                        plataformas. Basta clicar em "Copiar" e colar no campo correspondente.
+                      </p>
                     </div>
                   </TabsContent>
                 ))}

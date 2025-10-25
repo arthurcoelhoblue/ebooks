@@ -106,6 +106,23 @@ export const appRouter = router({
               "text/html"
             );
 
+            // Generate metadata
+            const { generateEbookMetadata } = await import("./metadataGenerator");
+            const { createEbookMetadata } = await import("./db");
+            const contentPreview = generatedBook.chapters.map(c => c.content).join(" ").substring(0, 1000);
+            const metadata = await generateEbookMetadata(generatedBook.title, input.theme, contentPreview);
+            
+            await createEbookMetadata({
+              ebookId,
+              optimizedTitle: metadata.optimizedTitle,
+              shortDescription: metadata.shortDescription,
+              longDescription: metadata.longDescription,
+              keywords: JSON.stringify(metadata.keywords),
+              categories: JSON.stringify(metadata.categories),
+              suggestedPrice: metadata.suggestedPrice,
+              targetAudience: metadata.targetAudience,
+            });
+
             // Update ebook with results
             await updateEbookStatus(ebookId, "completed", {
               title: generatedBook.title,
@@ -180,6 +197,126 @@ export const appRouter = router({
         const { updatePublishingGuide } = await import("./db");
         await updatePublishingGuide(input.id, { completed: input.completed ? 1 : 0 });
         return { success: true };
+      }),
+  }),
+
+  schedules: router({
+    // List all schedules for current user
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const { getSchedulesByUserId } = await import("./db");
+      return getSchedulesByUserId(ctx.user.id);
+    }),
+
+    // Create new schedule
+    create: protectedProcedure
+      .input((val: unknown) => {
+        if (
+          typeof val === "object" &&
+          val !== null &&
+          "name" in val &&
+          typeof val.name === "string" &&
+          "frequency" in val &&
+          typeof val.frequency === "string" &&
+          "totalEbooks" in val &&
+          typeof val.totalEbooks === "number" &&
+          "themeMode" in val &&
+          typeof val.themeMode === "string" &&
+          "author" in val &&
+          typeof val.author === "string"
+        ) {
+          return {
+            name: val.name,
+            frequency: val.frequency as "daily" | "weekly" | "monthly",
+            totalEbooks: val.totalEbooks,
+            themeMode: val.themeMode as "custom_list" | "single_theme" | "trending",
+            themes: "themes" in val && typeof val.themes === "string" ? val.themes : undefined,
+            singleTheme: "singleTheme" in val && typeof val.singleTheme === "string" ? val.singleTheme : undefined,
+            author: val.author,
+          };
+        }
+        throw new Error("Invalid input");
+      })
+      .mutation(async ({ input, ctx }) => {
+        const { createSchedule } = await import("./db");
+        
+        // Calculate next run time
+        const now = new Date();
+        const nextRunAt = new Date(now);
+        if (input.frequency === "daily") {
+          nextRunAt.setDate(nextRunAt.getDate() + 1);
+        } else if (input.frequency === "weekly") {
+          nextRunAt.setDate(nextRunAt.getDate() + 7);
+        } else {
+          nextRunAt.setMonth(nextRunAt.getMonth() + 1);
+        }
+
+        const scheduleId = await createSchedule({
+          userId: ctx.user.id,
+          name: input.name,
+          frequency: input.frequency,
+          totalEbooks: input.totalEbooks,
+          themeMode: input.themeMode,
+          themes: input.themes,
+          singleTheme: input.singleTheme,
+          author: input.author,
+          active: 1,
+          nextRunAt,
+        });
+
+        return { id: scheduleId };
+      }),
+
+    // Delete schedule
+    delete: protectedProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "id" in val && typeof val.id === "number") {
+          return { id: val.id };
+        }
+        throw new Error("Invalid input");
+      })
+      .mutation(async ({ input }) => {
+        const { deleteSchedule } = await import("./db");
+        await deleteSchedule(input.id);
+        return { success: true };
+      }),
+
+    // Get trending topics
+    getTrendingTopics: protectedProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null) {
+          return {
+            category: "category" in val && typeof val.category === "string" ? val.category : undefined,
+            count: "count" in val && typeof val.count === "number" ? val.count : 5,
+          };
+        }
+        return { category: undefined, count: 5 };
+      })
+      .query(async ({ input }) => {
+        const { findTrendingTopics } = await import("./trendingTopics");
+        return findTrendingTopics(input.category, input.count);
+      }),
+  }),
+
+  metadata: router({
+    // Get metadata for an ebook
+    getByEbookId: protectedProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "ebookId" in val && typeof val.ebookId === "number") {
+          return { ebookId: val.ebookId };
+        }
+        throw new Error("Invalid input");
+      })
+      .query(async ({ input }) => {
+        const { getEbookMetadataByEbookId } = await import("./db");
+        const metadata = await getEbookMetadataByEbookId(input.ebookId);
+        if (!metadata) return null;
+        
+        // Parse JSON fields
+        return {
+          ...metadata,
+          keywords: metadata.keywords ? JSON.parse(metadata.keywords) : [],
+          categories: metadata.categories ? JSON.parse(metadata.categories) : [],
+        };
       }),
   }),
 });
