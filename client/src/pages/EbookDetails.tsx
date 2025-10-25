@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { trpc } from "@/lib/trpc";
 import {
   ArrowLeft,
@@ -20,6 +21,7 @@ import {
   Sparkles,
   Plus,
   X,
+  Check,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -33,22 +35,32 @@ const PLATFORMS = [
   { value: "monetizze", label: "Monetizze", color: "bg-purple-100 text-purple-700 border-purple-200" },
 ];
 
-function CopyField({ label, value }: { label: string; value: string }) {
+function CopyButton({ value, label }: { value: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+  
   const handleCopy = () => {
     navigator.clipboard.writeText(value);
-    toast.success(`${label} copiado!`);
+    setCopied(true);
+    toast.success(`${label || "Texto"} copiado!`);
+    setTimeout(() => setCopied(false), 2000);
   };
 
+  return (
+    <Button variant="ghost" size="sm" onClick={handleCopy} className="h-8 gap-2">
+      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+      {copied ? "Copiado!" : "Copiar"}
+    </Button>
+  );
+}
+
+function CopyField({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium">{label}</label>
-        <Button variant="ghost" size="sm" onClick={handleCopy} className="h-8 gap-2">
-          <Copy className="w-4 h-4" />
-          Copiar
-        </Button>
+        <CopyButton value={value} label={label} />
       </div>
-      <div className="p-3 bg-muted rounded-lg text-sm font-mono break-words">{value}</div>
+      <div className="p-3 bg-muted rounded-lg text-sm break-words">{value}</div>
     </div>
   );
 }
@@ -90,9 +102,9 @@ export default function EbookDetails() {
     return publications?.some(p => p.platform === platform);
   };
 
-  const getPublicationUrl = (platform: string) => {
-    return publications?.find(p => p.platform === platform)?.publicationUrl;
-  };
+  // Parse keywords and categories
+  const keywords = metadata?.keywords ? JSON.parse(metadata.keywords) : [];
+  const categories = metadata?.categories ? JSON.parse(metadata.categories) : [];
 
   if (ebookLoading || metadataLoading) {
     return (
@@ -224,33 +236,256 @@ export default function EbookDetails() {
             </div>
           </div>
 
-          {/* Metadata Section */}
-          {metadata && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
-                  Metadados Otimizados para Publicação
-                </CardTitle>
-                <CardDescription>
-                  Copie e cole estes campos nas plataformas de publicação
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <CopyField label="Título" value={metadata.optimizedTitle || ebook.title} />
-                <CopyField label="Descrição" value={metadata.longDescription || metadata.shortDescription || ""} />
-                <CopyField
-                  label="Palavras-chave"
-                  value={metadata.keywords ? JSON.parse(metadata.keywords).join(", ") : ""}
-                />
-                <CopyField
-                  label="Categorias"
-                  value={metadata.categories ? JSON.parse(metadata.categories).join(", ") : ""}
-                />
-                <CopyField label="Preço Sugerido" value={metadata.suggestedPrice || "R$ 29,90"} />
-              </CardContent>
-            </Card>
-          )}
+          {/* Guias de Publicação */}
+          <Tabs defaultValue="amazon_kdp" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="amazon_kdp">Amazon KDP</TabsTrigger>
+              <TabsTrigger value="hotmart">Hotmart</TabsTrigger>
+              <TabsTrigger value="eduzz">Eduzz</TabsTrigger>
+              <TabsTrigger value="monetizze">Monetizze</TabsTrigger>
+            </TabsList>
+
+            {/* Amazon KDP */}
+            <TabsContent value="amazon_kdp" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Guia de Publicação - Amazon KDP</span>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="https://kdp.amazon.com" target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Abrir KDP
+                      </a>
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Publique na maior plataforma de eBooks do mundo
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="step1">
+                      <AccordionTrigger>1. Criar conta no KDP</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>Acesse <a href="https://kdp.amazon.com" target="_blank" className="text-blue-600 underline">kdp.amazon.com</a> e clique em "Sign up"</p>
+                        <p>Você precisará de:</p>
+                        <ul className="list-disc list-inside space-y-1 ml-4">
+                          <li>Conta Amazon existente ou criar uma nova</li>
+                          <li>Informações fiscais (CPF/CNPJ)</li>
+                          <li>Dados bancários para receber royalties</li>
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step2">
+                      <AccordionTrigger>2. Iniciar novo projeto de eBook</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>No painel do KDP, clique em "+ Create" e selecione "Kindle eBook"</p>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step3">
+                      <AccordionTrigger>3. Preencher metadados</AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <CopyField label="Título" value={metadata?.optimizedTitle || ebook.title} />
+                        <CopyField label="Descrição" value={metadata?.longDescription || metadata?.shortDescription || ""} />
+                        <CopyField label="Autor" value={ebook.author} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step4">
+                      <AccordionTrigger>4. Escolher palavras-chave (7 sugeridas)</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p className="text-sm text-muted-foreground">Cole cada palavra-chave nos 7 campos disponíveis:</p>
+                        <div className="space-y-2">
+                          {keywords.map((keyword: string, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                              <span className="text-sm">{index + 1}. {keyword}</span>
+                              <CopyButton value={keyword} label={`Palavra-chave ${index + 1}`} />
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step5">
+                      <AccordionTrigger>5. Selecionar categorias</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p className="text-sm text-muted-foreground">Categorias sugeridas (escolha até 2):</p>
+                        <div className="space-y-2">
+                          {categories.map((category: string, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                              <span className="text-sm">{category}</span>
+                              <CopyButton value={category} label="Categoria" />
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step6">
+                      <AccordionTrigger>6. Upload do arquivo EPUB</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>Na seção "Manuscript", clique em "Upload eBook manuscript"</p>
+                        {ebook.epubUrl && (
+                          <Button variant="outline" asChild>
+                            <a href={ebook.epubUrl} target="_blank" rel="noopener noreferrer">
+                              <Download className="w-4 h-4 mr-2" />
+                              Baixar EPUB para upload
+                            </a>
+                          </Button>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step7">
+                      <AccordionTrigger>7. Upload da capa</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>Na seção "Cover", clique em "Upload a cover you already have"</p>
+                        {ebook.coverUrl && (
+                          <div className="space-y-2">
+                            <img src={ebook.coverUrl} alt="Capa" className="w-32 h-auto rounded" />
+                            <Button variant="outline" asChild>
+                              <a href={ebook.coverUrl} target="_blank" rel="noopener noreferrer">
+                                <Download className="w-4 h-4 mr-2" />
+                                Baixar capa para upload
+                              </a>
+                            </Button>
+                          </div>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step8">
+                      <AccordionTrigger>8. Definir preço e royalties</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <CopyField label="Preço sugerido" value={metadata?.suggestedPrice || "R$ 29,90"} />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Recomendação: Escolha royalty de 70% para preços entre $2.99 e $9.99 USD
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step9">
+                      <AccordionTrigger>9. Publicar</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>Revise todas as informações e clique em "Publish your Kindle eBook"</p>
+                        <p className="text-sm text-muted-foreground">
+                          Seu eBook estará disponível em até 72 horas após aprovação
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Hotmart */}
+            <TabsContent value="hotmart" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Guia de Publicação - Hotmart</span>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="https://hotmart.com" target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Abrir Hotmart
+                      </a>
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Venda no maior marketplace de produtos digitais do Brasil
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="step1">
+                      <AccordionTrigger>1. Criar conta gratuita</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>Acesse <a href="https://hotmart.com" target="_blank" className="text-blue-600 underline">hotmart.com</a> e clique em "Cadastre-se grátis"</p>
+                        <p>Complete o cadastro como Produtor</p>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step2">
+                      <AccordionTrigger>2. Cadastrar produto</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>No painel, vá em "Produtos" → "Criar novo produto"</p>
+                        <p>Selecione tipo: "eBook/Livro Digital"</p>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step3">
+                      <AccordionTrigger>3. Preencher informações</AccordionTrigger>
+                      <AccordionContent className="space-y-4">
+                        <CopyField label="Nome do Produto" value={metadata?.optimizedTitle || ebook.title} />
+                        <CopyField label="Descrição" value={metadata?.longDescription || metadata?.shortDescription || ""} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step4">
+                      <AccordionTrigger>4. Upload do arquivo PDF</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>Na seção "Conteúdo", faça upload do arquivo PDF</p>
+                        {ebook.pdfUrl && (
+                          <Button variant="outline" asChild>
+                            <a href={ebook.pdfUrl} target="_blank" rel="noopener noreferrer">
+                              <Download className="w-4 h-4 mr-2" />
+                              Baixar PDF para upload
+                            </a>
+                          </Button>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step5">
+                      <AccordionTrigger>5. Definir preço</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <CopyField label="Preço sugerido" value={metadata?.suggestedPrice || "R$ 29,90"} />
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step6">
+                      <AccordionTrigger>6. Configurar programa de afiliados</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>Defina comissão para afiliados (sugestão: 50-70%)</p>
+                        <p className="text-sm text-muted-foreground">
+                          Afiliados ajudarão a divulgar seu eBook
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="step7">
+                      <AccordionTrigger>7. Publicar e promover</AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        <p>Clique em "Publicar produto"</p>
+                        <p>Use as ferramentas de marketing da Hotmart para divulgar</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Eduzz e Monetizze com estrutura similar */}
+            <TabsContent value="eduzz">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Guia de Publicação - Eduzz</CardTitle>
+                  <CardDescription>Em breve - guia detalhado</CardDescription>
+                </CardHeader>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="monetizze">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Guia de Publicação - Monetizze</CardTitle>
+                  <CardDescription>Em breve - guia detalhado</CardDescription>
+                </CardHeader>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 

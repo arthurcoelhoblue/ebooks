@@ -48,4 +48,13 @@
 - [x] Dialog para adicionar publicações com URL
 - [x] Remover publicações com um clique
 - [x] Tabela publications no banco de dados
+- [x] Guias de publicação interativos com accordion
+- [x] Instruções detalhadas em cada passo do checklist
+- [x] Campos prontos para copiar dentro de cada passo
+- [x] Lista completa de palavras-chave com botão copiar individual
+- [x] Categorias sugeridas com botão copiar
+- [x] Botões para baixar arquivos (EPUB, PDF, capa)
+- [x] Links diretos para abrir plataformas
+- [x] Guia completo Amazon KDP (9 passos)
+- [x] Guia completo Hotmart (7 passos)
 
