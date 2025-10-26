@@ -64,6 +64,20 @@
       "when": 1761423251945,
       "tag": "0008_useful_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1761507409953,
+      "tag": "0009_simple_deathbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1761507432096,
+      "tag": "0010_woozy_shockwave",
+      "breakpoints": true
     }
   ]
 }

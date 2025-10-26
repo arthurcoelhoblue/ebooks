@@ -33,6 +33,7 @@ export const ebooks = mysqlTable("ebooks", {
   userId: int("userId").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   theme: text("theme").notNull(),
+  languages: text("languages"), // comma-separated language codes
   author: varchar("author", { length: 255 }).notNull(),
   status: mysqlEnum("status", ["processing", "completed", "failed"]).default("processing").notNull(),
   epubUrl: text("epubUrl"),

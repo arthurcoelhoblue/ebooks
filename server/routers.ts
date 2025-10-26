@@ -51,13 +51,12 @@ export const appRouter = router({
           "theme" in val &&
           typeof val.theme === "string" &&
           "author" in val &&
-          typeof val.author === "string"
+          typeof val.author === "string" &&
+          "numChapters" in val &&
+          typeof val.numChapters === "number"
         ) {
-          return {
-            theme: val.theme,
-            author: val.author,
-            numChapters: "numChapters" in val && typeof val.numChapters === "number" ? val.numChapters : 5,
-          };
+          const languages = "languages" in val && typeof val.languages === "string" ? val.languages : "pt";
+          return { theme: val.theme, author: val.author, numChapters: val.numChapters, languages };
         }
         throw new Error("Invalid input");
       })

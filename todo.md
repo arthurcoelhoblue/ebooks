@@ -31,6 +31,13 @@
 - [ ] Execução automática dos agendamentos via cron job (requer configuração de servidor)
 
 ## In Progress
+- [x] Campo languages adicionado ao banco de dados
+- [x] Seletor visual de 11 idiomas no formulário de criação
+- [x] Helper de tradução com IA (translator.ts)
+- [x] Backend atualizado para receber idiomas selecionados
+- [ ] Implementar geração de múltiplos arquivos por idioma
+- [ ] Indicadores visuais de idiomas disponíveis nos cards
+- [ ] Download separado por idioma
 - [x] Campo de número de vendas nas publicações (salesCount)
 - [x] Dashboard financeiro com ranking de eBooks (/analytics)
 - [x] Ranking por lucro, ROI, vendas e receita
