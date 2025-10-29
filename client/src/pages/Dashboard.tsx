@@ -66,6 +66,16 @@ export default function Dashboard() {
       return () => clearInterval(interval);
     }
   }, [ebooks, refetch]);
+  const reprocessMutation = trpc.ebooks.reprocessAll.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Reprocessamento concluído! ${result?.processed || 0} eBooks processados, ${result?.failed || 0} falharam.`);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Erro ao reprocessar eBooks: ${error.message}`);
+    },
+  });
+
   const createMutation = trpc.ebooks.create.useMutation({
     onSuccess: () => {
       toast.success("eBook em geração! Aguarde alguns minutos...");
@@ -121,6 +131,29 @@ export default function Dashboard() {
               <p className="text-muted-foreground mt-2">Gerencie seus eBooks criados com IA</p>
             </div>
             <div className="flex gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  if (confirm("Deseja reprocessar todos os eBooks para gerar arquivos multi-idioma? Isso pode levar alguns minutos.")) {
+                    reprocessMutation.mutate();
+                  }
+                }}
+                disabled={reprocessMutation.isPending}
+                className="gap-2"
+              >
+                {reprocessMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Reprocessando...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    Reprocessar Todos
+                  </>
+                )}
+              </Button>
               <Link href="/schedules">
                 <Button variant="outline" size="lg" className="gap-2">
                   <Calendar className="w-5 h-5" />

@@ -61,6 +61,12 @@ export async function processSchedules() {
 
       console.log(`[Scheduler] Generating ebook for schedule ${schedule.id} with theme: ${theme}`);
 
+      // Parse languages from schedule
+      const languageCodes = schedule.languages ? schedule.languages.split(",").map(l => l.trim()).filter(Boolean) : ["pt"];
+      if (languageCodes.length === 0) {
+        languageCodes.push("pt");
+      }
+
       // Create ebook record
       const ebookResult = await db.insert(ebooks).values({
         userId: schedule.userId,
@@ -68,64 +74,70 @@ export async function processSchedules() {
         theme,
         author: schedule.author,
         status: "processing",
+        languages: schedule.languages || "pt",
       });
 
       const ebookId = ebookResult[0].insertId;
 
-      // Generate ebook asynchronously
+      // Generate ebook asynchronously with multi-language support
       (async () => {
         try {
-          // Generate content
-          const generatedBook = await generateEbookContent(theme, 5);
-          const htmlContent = compileToHTML(generatedBook.title, schedule.author, generatedBook.chapters);
+          const { generateMultiLanguageEbook } = await import("./multiLanguageGenerator");
+          const { createEbookFile, createEbookMetadata } = await import("./db");
 
-          // Generate cover
-          const coverPrompt = generateCoverPrompt(generatedBook.title, theme);
-          const { url: coverUrl } = await generateImage({ prompt: coverPrompt });
-
-          // Upload files
-          const htmlBuffer = Buffer.from(htmlContent, "utf-8");
-          const { url: pdfUrl } = await storagePut(
-            `ebooks/${schedule.userId}/${ebookId}/ebook.html`,
-            htmlBuffer,
-            "text/html"
+          // Generate files for all languages
+          const languageFiles = await generateMultiLanguageEbook(
+            theme,
+            schedule.author,
+            5,
+            languageCodes,
+            schedule.userId,
+            ebookId
           );
 
-          const { url: epubUrl } = await storagePut(
-            `ebooks/${schedule.userId}/${ebookId}/ebook-preview.html`,
-            htmlBuffer,
-            "text/html"
-          );
-
-          // Generate metadata
-          const contentPreview = generatedBook.chapters.map(c => c.content).join(" ").substring(0, 1000);
-          const metadata = await generateEbookMetadata(generatedBook.title, theme, contentPreview);
-
-          // Save metadata
-          const { createEbookMetadata } = await import("./db");
-          await createEbookMetadata({
-            ebookId,
-            optimizedTitle: metadata.optimizedTitle,
-            shortDescription: metadata.shortDescription,
-            longDescription: metadata.longDescription,
-            keywords: JSON.stringify(metadata.keywords),
-            categories: JSON.stringify(metadata.categories),
-            suggestedPrice: metadata.suggestedPrice,
-            targetAudience: metadata.targetAudience,
-          });
-
-          // Update ebook status
-          await db
-            .update(ebooks)
-            .set({
+          // Save each language file to database
+          for (const file of languageFiles) {
+            await createEbookFile({
+              ebookId,
+              languageCode: file.languageCode,
+              epubUrl: file.epubUrl,
+              pdfUrl: file.pdfUrl,
+              coverUrl: file.coverUrl,
               status: "completed",
-              title: generatedBook.title,
-              epubUrl,
-              pdfUrl,
-              coverUrl,
-              content: JSON.stringify(generatedBook.chapters),
-            })
-            .where(eq(ebooks.id, ebookId));
+            });
+          }
+
+          // Use first language for main eBook record
+          const primaryFile = languageFiles[0];
+          if (primaryFile) {
+            // Generate metadata
+            const contentPreview = "";
+            const metadata = await generateEbookMetadata(primaryFile.title, theme, contentPreview);
+            
+            await createEbookMetadata({
+              ebookId,
+              optimizedTitle: metadata.optimizedTitle,
+              shortDescription: metadata.shortDescription,
+              longDescription: metadata.longDescription,
+              keywords: JSON.stringify(metadata.keywords),
+              categories: JSON.stringify(metadata.categories),
+              suggestedPrice: metadata.suggestedPrice,
+              targetAudience: metadata.targetAudience,
+              platformRecommendations: JSON.stringify(metadata.platformRecommendations || []),
+            });
+
+            // Update ebook status
+            await db
+              .update(ebooks)
+              .set({
+                status: "completed",
+                title: primaryFile.title,
+                epubUrl: primaryFile.epubUrl,
+                pdfUrl: primaryFile.pdfUrl,
+                coverUrl: primaryFile.coverUrl,
+              })
+              .where(eq(ebooks.id, ebookId));
+          }
 
           console.log(`[Scheduler] Successfully generated ebook ${ebookId}`);
         } catch (error: any) {

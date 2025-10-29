@@ -34,6 +34,8 @@
 - [ ] Agendamentos não estão sendo executados automaticamente (em desenvolvimento)
 - [x] Falta opção de selecionar idiomas nos agendamentos (RESOLVIDO)
 - [x] Erro ao baixar PDF: JSON parse error (RESOLVIDO - implementado sistema multi-idioma)
+- [x] Agendamentos não estão gerando arquivos multi-idioma (RESOLVIDO - schedulerWorker atualizado)
+- [x] eBooks antigos sem arquivos traduzidos (RESOLVIDO - botão "Reprocessar Todos" adicionado)
 
 ## In Progress
 - [x] Campo languages adicionado ao banco de dados

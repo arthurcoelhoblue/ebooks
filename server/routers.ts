@@ -19,6 +19,11 @@ export const appRouter = router({
   }),
 
   ebooks: router({
+    reprocessAll: protectedProcedure.mutation(async () => {
+      const { reprocessAllEbooks } = await import("./reprocessEbooks");
+      const result = await reprocessAllEbooks();
+      return result;
+    }),
     // List all ebooks for current user
     list: protectedProcedure.query(async ({ ctx }) => {
       const { getEbooksByUserId } = await import("./db");
