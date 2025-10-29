@@ -82,14 +82,13 @@ export async function processSchedules() {
       // Generate ebook asynchronously with multi-language support
       (async () => {
         try {
-          const { generateMultiLanguageEbook } = await import("./multiLanguageGenerator");
+          const { generateMultiLanguageWinnerEbook } = await import("./multiLanguageGeneratorWinner");
           const { createEbookFile, createEbookMetadata } = await import("./db");
 
-          // Generate files for all languages
-          const languageFiles = await generateMultiLanguageEbook(
+          // Generate files for all languages using WINNER structure
+          const languageFiles = await generateMultiLanguageWinnerEbook(
             theme,
             schedule.author,
-            5,
             languageCodes,
             schedule.userId,
             ebookId

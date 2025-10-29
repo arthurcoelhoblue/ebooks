@@ -158,3 +158,8 @@
 - [x] H1 format: "CAPÍTULO {n} — {Título Promissor}"
 - [x] Novo gerador integrado ao fluxo principal (multiLanguageGeneratorWinner.ts)
 
+
+
+## Bug Urgente
+- [x] Agendamentos ainda usam gerador antigo - precisa usar modelo vencedor (RESOLVIDO)
+
