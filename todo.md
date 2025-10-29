@@ -136,3 +136,25 @@
 - [x] Busca por título/tema
 - [x] Ordenação (mais recentes, mais antigos, alfabética)
 
+
+
+
+## Novo Modelo Vencedor de eBook (Baseado em Pesquisa) ✅ IMPLEMENTADO
+- [x] Implementar estrutura de não-ficção transformacional (10 capítulos)
+- [x] Capítulos otimizados (1200-2500 palavras cada)
+- [x] Ganchos no final de cada capítulo (pergunta/promessa/cliffhanger)
+- [x] Front matter: capa, direitos, sumário clicável, carta ao leitor
+- [x] Cap 1: Big Promise & Gap (história + objetivo + obstáculo)
+- [x] Cap 2: Novo Modelo Mental (desmonte crenças + framework)
+- [x] Cap 3-7: 5 Pilares (mini-história + conceito + checklist + erro comum + micro-desafio)
+- [x] Cap 8: Plano de 30 dias (tabela executável)
+- [x] Cap 9: Casos de uso e FAQs
+- [x] Cap 10: Conclusão com carta de compromisso
+- [x] Back matter: bônus (templates), sobre autor, CTA próximo passo
+- [x] Formatação EPUB reflowable profissional
+- [x] TOC navegável com links internos
+- [x] Quebras de página antes de cada H1
+- [x] Estilos CSS corretos (indent 0.9em, line-height 1.3)
+- [x] H1 format: "CAPÍTULO {n} — {Título Promissor}"
+- [x] Novo gerador integrado ao fluxo principal (multiLanguageGeneratorWinner.ts)
+

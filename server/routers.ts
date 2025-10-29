@@ -101,13 +101,12 @@ export const appRouter = router({
         (async () => {
           try {
             const { updateEbookStatus, createEbookFile } = await import("./db");
-            const { generateMultiLanguageEbook } = await import("./multiLanguageGenerator");
+            const { generateMultiLanguageWinnerEbook } = await import("./multiLanguageGeneratorWinner");
 
-            // Generate files for all languages
-            const languageFiles = await generateMultiLanguageEbook(
+            // Generate files for all languages using WINNER structure
+            const languageFiles = await generateMultiLanguageWinnerEbook(
               input.theme,
               input.author,
-              input.numChapters,
               languageCodes,
               ctx.user.id,
               ebookId

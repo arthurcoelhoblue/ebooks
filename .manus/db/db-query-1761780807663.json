@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, title, status, theme, createdAt FROM ebooks ORDER BY id DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2jqMZP8uptaqoP6.69c06741494c --database QRUUMfBRuuUjNGtMLjyK6c --execute SELECT id, title, status, theme, createdAt FROM ebooks ORDER BY id DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "150005",
+      "title": "eBook sobre Produtividade e Gestão de Tempo",
+      "status": "processing",
+      "theme": "Produtividade e Gestão de Tempo",
+      "createdAt": "2025-10-29 23:28:51"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tstatus\ttheme\tcreatedAt\n150005\teBook sobre Produtividade e Gestão de Tempo\tprocessing\tProdutividade e Gestão de Tempo\t2025-10-29 23:28:51\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}
