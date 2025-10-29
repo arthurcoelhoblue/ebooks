@@ -6,9 +6,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { BookOpen, Calendar, Download, FileText, Loader2, Plus, Sparkles, Clock, CheckCircle2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { BookOpen, Calendar, Download, FileText, Loader2, Plus, Sparkles, Clock, CheckCircle2, Trash2, Search, Filter } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { Link } from "wouter";
 
@@ -21,6 +22,11 @@ export default function Dashboard() {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["pt"]);
   const [showFilesDialog, setShowFilesDialog] = useState(false);
   const [selectedEbookForFiles, setSelectedEbookForFiles] = useState<number | null>(null);
+  
+  // Filtros
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   const languages = [
     { code: "pt", name: "Portugu\u00eas", flag: "\ud83c\udde7\ud83c\uddf7" },
@@ -44,7 +50,44 @@ export default function Dashboard() {
     );
   };
 
-  const { data: ebooks, isLoading, refetch } = trpc.ebooks.list.useQuery();
+  const { data: allEbooks, isLoading, refetch } = trpc.ebooks.list.useQuery();
+  
+  // Aplicar filtros e ordenação
+  const ebooks = useMemo(() => {
+    if (!allEbooks) return [];
+    
+    let filtered = [...allEbooks];
+    
+    // Filtro de busca
+    if (searchTerm) {
+      filtered = filtered.filter(ebook => 
+        ebook.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ebook.theme?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ebook.author.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Filtro de status
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(ebook => ebook.status === statusFilter);
+    }
+    
+    // Ordenação
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "oldest":
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "title":
+          return a.title.localeCompare(b.title);
+        default:
+          return 0;
+      }
+    });
+    
+    return filtered;
+  }, [allEbooks, searchTerm, statusFilter, sortBy]);
   const { data: allPublications } = trpc.publications.getByEbookId.useQuery({ ebookId: 0 }); // Placeholder
 
   const getPlatformBadge = (platform: string) => {
@@ -73,6 +116,16 @@ export default function Dashboard() {
     },
     onError: (error) => {
       toast.error(`Erro ao reprocessar eBooks: ${error.message}`);
+    },
+  });
+
+  const deleteMutation = trpc.ebooks.delete.useMutation({
+    onSuccess: () => {
+      toast.success("eBook excluído com sucesso!");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Erro ao excluir eBook: ${error.message}`);
     },
   });
 
@@ -255,6 +308,62 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Filtros e Busca */}
+          <div className="bg-white rounded-lg border p-4 space-y-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <Filter className="w-4 h-4" />
+              Filtros e Busca
+            </div>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Buscar por título, tema ou autor..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os status</SelectItem>
+                  <SelectItem value="completed">Concluídos</SelectItem>
+                  <SelectItem value="processing">Em processamento</SelectItem>
+                  <SelectItem value="failed">Com erro</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Ordenar por" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Mais recentes</SelectItem>
+                  <SelectItem value="oldest">Mais antigos</SelectItem>
+                  <SelectItem value="title">Título (A-Z)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {(searchTerm || statusFilter !== "all") && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>{ebooks?.length || 0} eBook(s) encontrado(s)</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setStatusFilter("all");
+                  }}
+                  className="h-auto py-1 px-2 text-xs"
+                >
+                  Limpar filtros
+                </Button>
+              </div>
+            )}
+          </div>
+
           {/* eBooks Grid */}
           {isLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -336,6 +445,20 @@ export default function Dashboard() {
                               Ver Guias de Monetização
                             </Button>
                           </Link>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => {
+                              if (confirm(`Tem certeza que deseja excluir "${ebook.title}"? Esta ação não pode ser desfeita.`)) {
+                                deleteMutation.mutate({ id: ebook.id });
+                              }
+                            }}
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Excluir eBook
+                          </Button>
                         </>
                       ) : ebook.status === "processing" ? (
                         <div className="text-center py-4">

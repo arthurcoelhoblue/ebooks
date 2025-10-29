@@ -312,3 +312,26 @@ export async function updateFinancialMetrics(ebookId: number, data: Partial<Inse
     await createFinancialMetrics({ ebookId, ...data });
   }
 }
+
+
+/**
+ * Delete an ebook and all related data (cascade delete)
+ * Deletes: ebookFiles, publishingGuides, publications, financialMetrics, ebookMetadata, and the ebook itself
+ */
+export async function deleteEbook(ebookId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { ebookFiles } = await import("../drizzle/schema");
+  
+  // Delete all related data (order matters due to foreign keys)
+  await db.delete(ebookFiles).where(eq(ebookFiles.ebookId, ebookId));
+  await db.delete(publishingGuides).where(eq(publishingGuides.ebookId, ebookId));
+  await db.delete(publications).where(eq(publications.ebookId, ebookId));
+  await db.delete(financialMetrics).where(eq(financialMetrics.ebookId, ebookId));
+  await db.delete(ebookMetadata).where(eq(ebookMetadata.ebookId, ebookId));
+  
+  // Finally delete the ebook itself
+  await db.delete(ebooks).where(eq(ebooks.id, ebookId));
+}
+

@@ -125,3 +125,14 @@
 - [x] Header adicionado no Dashboard
 - [x] Landing Page atualizada com logo e nome EbookStudio
 
+
+
+
+## Novas Funcionalidades Solicitadas
+- [x] Botão para excluir eBooks do Dashboard
+- [x] Confirmação antes de excluir
+- [x] Deletar eBook e todos os arquivos relacionados (ebookFiles, metadata, publications, financialMetrics)
+- [x] Filtros no Dashboard (status, data, idiomas, autor)
+- [x] Busca por título/tema
+- [x] Ordenação (mais recentes, mais antigos, alfabética)
+

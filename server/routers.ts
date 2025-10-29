@@ -167,6 +167,28 @@ export const appRouter = router({
 
         return { id: ebookId, status: "processing" };
       }),
+
+    // Delete ebook and all related data
+    delete: protectedProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "id" in val && typeof val.id === "number") {
+          return { id: val.id };
+        }
+        throw new Error("Invalid input");
+      })
+      .mutation(async ({ input, ctx }) => {
+        const { getEbookById, deleteEbook } = await import("./db");
+        
+        // Verify ownership
+        const ebook = await getEbookById(input.id);
+        if (!ebook || ebook.userId !== ctx.user.id) {
+          throw new Error("Ebook not found or unauthorized");
+        }
+        
+        // Delete ebook and all related data (cascade)
+        await deleteEbook(input.id);
+        return { success: true };
+      }),
   }),
 
   publishingGuides: router({
