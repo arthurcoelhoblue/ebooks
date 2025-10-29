@@ -78,7 +78,8 @@ export const schedules = mysqlTable("schedules", {
   themes: text("themes"), // JSON array of themes for custom_list mode
   singleTheme: text("singleTheme"), // Single theme for single_theme mode
   author: varchar("author", { length: 255 }).notNull(),
-  scheduledTime: varchar("scheduledTime", { length: 5 }), // HH:MM format (e.g., "08:00")
+  scheduledTime: varchar("scheduledTime", { length: 5 }), // HH:MM format
+  languages: text("languages"), // Comma-separated language codes
   active: int("active").default(1).notNull(), // boolean as tinyint
   lastRunAt: timestamp("lastRunAt"),
   nextRunAt: timestamp("nextRunAt"),

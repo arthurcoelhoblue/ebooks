@@ -30,14 +30,22 @@
 - [ ] Dashboard com estatísticas de eBooks gerados
 - [ ] Execução automática dos agendamentos via cron job (requer configuração de servidor)
 
+## Bugs Reportados
+- [ ] Agendamentos não estão sendo executados automaticamente (em desenvolvimento)
+- [x] Falta opção de selecionar idiomas nos agendamentos (RESOLVIDO)
+
 ## In Progress
 - [x] Campo languages adicionado ao banco de dados
 - [x] Seletor visual de 11 idiomas no formulário de criação
 - [x] Helper de tradução com IA (translator.ts)
 - [x] Backend atualizado para receber idiomas selecionados
+- [x] Campo languages adicionado à tabela schedules
+- [x] Seletor de 11 idiomas no formulário de agendamento
+- [x] Backend atualizado para salvar idiomas do agendamento
 - [ ] Implementar geração de múltiplos arquivos por idioma
 - [ ] Indicadores visuais de idiomas disponíveis nos cards
 - [ ] Download separado por idioma
+- [ ] Execução automática de agendamentos (worker em desenvolvimento)
 - [x] Campo de número de vendas nas publicações (salesCount)
 - [x] Dashboard financeiro com ranking de eBooks (/analytics)
 - [x] Ranking por lucro, ROI, vendas e receita

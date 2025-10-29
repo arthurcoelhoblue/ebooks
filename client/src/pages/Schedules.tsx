@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Calendar, Clock, Loader2, Plus, Sparkles, Trash2, TrendingUp } from "lucide-react";
+import { ArrowLeft, Calendar, CheckCircle2, Clock, Loader2, Plus, Sparkles, Trash2, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -33,6 +33,29 @@ export default function Schedules() {
   const [singleTheme, setSingleTheme] = useState("");
   const [author, setAuthor] = useState(user?.name || "");
   const [scheduledTime, setScheduledTime] = useState("");
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["pt"]);
+
+  const languages = [
+    { code: "pt", name: "Portugu\u00eas", flag: "\ud83c\udde7\ud83c\uddf7" },
+    { code: "en", name: "English", flag: "\ud83c\uddec\ud83c\udde7" },
+    { code: "es", name: "Espa\u00f1ol", flag: "\ud83c\uddea\ud83c\uddf8" },
+    { code: "zh", name: "\u4e2d\u6587", flag: "\ud83c\udde8\ud83c\uddf3" },
+    { code: "hi", name: "\u0939\u093f\u0928\u094d\u0926\u0940", flag: "\ud83c\uddee\ud83c\uddf3" },
+    { code: "ar", name: "\u0627\u0644\u0639\u0631\u0628\u064a\u0629", flag: "\ud83c\uddf8\ud83c\udde6" },
+    { code: "bn", name: "\u09ac\u09be\u0982\u09b2\u09be", flag: "\ud83c\udde7\ud83c\udde9" },
+    { code: "ru", name: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", flag: "\ud83c\uddf7\ud83c\uddfa" },
+    { code: "ja", name: "\u65e5\u672c\u8a9e", flag: "\ud83c\uddef\ud83c\uddf5" },
+    { code: "de", name: "Deutsch", flag: "\ud83c\udde9\ud83c\uddea" },
+    { code: "fr", name: "Fran\u00e7ais", flag: "\ud83c\uddeb\ud83c\uddf7" },
+  ];
+
+  const toggleLanguage = (code: string) => {
+    setSelectedLanguages(prev => 
+      prev.includes(code) 
+        ? prev.filter(l => l !== code)
+        : [...prev, code]
+    );
+  };
 
   const { data: schedules, isLoading, refetch } = trpc.schedules.list.useQuery();
   const { data: ebooks } = trpc.ebooks.list.useQuery();
@@ -93,6 +116,11 @@ export default function Schedules() {
       return;
     }
 
+    if (selectedLanguages.length === 0) {
+      toast.error("Por favor, selecione pelo menos um idioma");
+      return;
+    }
+
     createMutation.mutate({
       name,
       frequency,
@@ -102,6 +130,7 @@ export default function Schedules() {
       singleTheme: themeMode === "single_theme" ? singleTheme : undefined,
       author,
       scheduledTime: scheduledTime || undefined,
+      languages: selectedLanguages.join(","),
     });
   };
 
@@ -289,6 +318,33 @@ export default function Schedules() {
                       <p className="text-xs text-muted-foreground">Um tema por linha</p>
                     </div>
                   )}
+
+                  <div className="space-y-2">
+                    <Label>Idiomas *</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {languages.map(lang => (
+                        <button
+                          key={lang.code}
+                          type="button"
+                          onClick={() => toggleLanguage(lang.code)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-md border transition-colors ${
+                            selectedLanguages.includes(lang.code)
+                              ? 'bg-purple-100 border-purple-500 text-purple-900'
+                              : 'bg-white border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <span>{lang.flag}</span>
+                          <span className="text-sm">{lang.name}</span>
+                          {selectedLanguages.includes(lang.code) && (
+                            <CheckCircle2 className="w-4 h-4 ml-auto" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedLanguages.length} idioma(s) selecionado(s)
+                    </p>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>

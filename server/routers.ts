@@ -234,6 +234,7 @@ export const appRouter = router({
             singleTheme: "singleTheme" in val && typeof val.singleTheme === "string" ? val.singleTheme : undefined,
             author: val.author,
             scheduledTime: "scheduledTime" in val && typeof val.scheduledTime === "string" ? val.scheduledTime : undefined,
+            languages: "languages" in val && typeof val.languages === "string" ? val.languages : "pt",
           };
         }
         throw new Error("Invalid input");
@@ -281,6 +282,7 @@ export const appRouter = router({
           singleTheme: input.singleTheme,
           author: input.author,
           scheduledTime: input.scheduledTime,
+          languages: input.languages,
           active: 1,
           nextRunAt,
         });
