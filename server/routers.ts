@@ -26,6 +26,18 @@ export const appRouter = router({
     }),
 
     // Get single ebook by ID
+    getFiles: protectedProcedure
+      .input((val: unknown) => {
+        if (typeof val === "object" && val !== null && "id" in val && typeof val.id === "number") {
+          return { id: val.id };
+        }
+        throw new Error("Invalid input");
+      })
+      .query(async ({ input }) => {
+        const { getEbookFilesByEbookId } = await import("./db");
+        return await getEbookFilesByEbookId(input.id);
+      }),
+
     getById: protectedProcedure
       .input((val: unknown) => {
         if (typeof val === "object" && val !== null && "id" in val && typeof val.id === "number") {
@@ -64,6 +76,12 @@ export const appRouter = router({
         const { createEbook } = await import("./db");
         const { generateEbookContent, compileToHTML } = await import("./ebookGenerator");
 
+        // Parse languages
+        const languageCodes = input.languages.split(",").map(l => l.trim()).filter(Boolean);
+        if (languageCodes.length === 0) {
+          languageCodes.push("pt"); // Default to Portuguese
+        }
+
         // Create initial ebook record
         const ebookId = await createEbook({
           userId: ctx.user.id,
@@ -71,68 +89,70 @@ export const appRouter = router({
           theme: input.theme,
           author: input.author,
           status: "processing",
+          languages: input.languages,
         });
 
-        // Start async generation (in production, this would be a queue job)
-        // For now, we'll do it synchronously but in a real app use RQ/Celery
+        // Start async generation for all languages
         (async () => {
           try {
-            const { updateEbookStatus } = await import("./db");
-            const { generateImage } = await import("./_core/imageGeneration");
-            const { storagePut } = await import("./storage");
+            const { updateEbookStatus, createEbookFile } = await import("./db");
+            const { generateMultiLanguageEbook } = await import("./multiLanguageGenerator");
 
-            // Generate content
-            const generatedBook = await generateEbookContent(input.theme, input.numChapters);
-            const htmlContent = compileToHTML(generatedBook.title, input.author, generatedBook.chapters);
-
-            // Generate cover
-            const { generateCoverPrompt } = await import("./ebookGenerator");
-            const coverPrompt = generateCoverPrompt(generatedBook.title, input.theme);
-            const { url: coverUrl } = await generateImage({ prompt: coverPrompt });
-
-            // Upload HTML as "PDF" (in production, convert to actual PDF)
-            const htmlBuffer = Buffer.from(htmlContent, "utf-8");
-            const { url: pdfUrl } = await storagePut(
-              `ebooks/${ctx.user.id}/${ebookId}/ebook.html`,
-              htmlBuffer,
-              "text/html"
+            // Generate files for all languages
+            const languageFiles = await generateMultiLanguageEbook(
+              input.theme,
+              input.author,
+              input.numChapters,
+              languageCodes,
+              ctx.user.id,
+              ebookId
             );
 
-            // For EPUB, we'd use a library like ebooklib equivalent in Node.js
-            // For now, we'll just store the HTML
-            const { url: epubUrl } = await storagePut(
-              `ebooks/${ctx.user.id}/${ebookId}/ebook-preview.html`,
-              htmlBuffer,
-              "text/html"
-            );
+            // Save each language file to database
+            for (const file of languageFiles) {
+              await createEbookFile({
+                ebookId,
+                languageCode: file.languageCode,
+                epubUrl: file.epubUrl,
+                pdfUrl: file.pdfUrl,
+                coverUrl: file.coverUrl,
+                status: "completed",
+              });
+            }
 
-            // Generate metadata
-            const { generateEbookMetadata } = await import("./metadataGenerator");
-            const { createEbookMetadata } = await import("./db");
-            const contentPreview = generatedBook.chapters.map(c => c.content).join(" ").substring(0, 1000);
-            const metadata = await generateEbookMetadata(generatedBook.title, input.theme, contentPreview);
-            
-            await createEbookMetadata({
-              ebookId,
-              optimizedTitle: metadata.optimizedTitle,
-              shortDescription: metadata.shortDescription,
-              longDescription: metadata.longDescription,
-              keywords: JSON.stringify(metadata.keywords),
-              categories: JSON.stringify(metadata.categories),
-              suggestedPrice: metadata.suggestedPrice,
-              targetAudience: metadata.targetAudience,
-              platformRecommendations: JSON.stringify(metadata.platformRecommendations || []),
-            });
+            // Use first language for main eBook record
+            const primaryFile = languageFiles[0];
+            if (primaryFile) {
+              // Generate metadata using primary language
+              const { generateEbookMetadata } = await import("./metadataGenerator");
+              const { createEbookMetadata, getEbookById } = await import("./db");
+              
+              const ebook = await getEbookById(ebookId);
+              const contentPreview = ebook?.content ? JSON.parse(ebook.content).map((c: any) => c.content).join(" ").substring(0, 1000) : "";
+              const metadata = await generateEbookMetadata(primaryFile.title, input.theme, contentPreview);
+              
+              await createEbookMetadata({
+                ebookId,
+                optimizedTitle: metadata.optimizedTitle,
+                shortDescription: metadata.shortDescription,
+                longDescription: metadata.longDescription,
+                keywords: JSON.stringify(metadata.keywords),
+                categories: JSON.stringify(metadata.categories),
+                suggestedPrice: metadata.suggestedPrice,
+                targetAudience: metadata.targetAudience,
+                platformRecommendations: JSON.stringify(metadata.platformRecommendations || []),
+              });
 
-            // Update ebook with results
-            await updateEbookStatus(ebookId, "completed", {
-              title: generatedBook.title,
-              epubUrl,
-              pdfUrl,
-              coverUrl,
-              content: JSON.stringify(generatedBook.chapters),
-            });
+              // Update main ebook record
+              await updateEbookStatus(ebookId, "completed", {
+                title: primaryFile.title,
+                epubUrl: primaryFile.epubUrl,
+                pdfUrl: primaryFile.pdfUrl,
+                coverUrl: primaryFile.coverUrl,
+              });
+            }
           } catch (error: any) {
+            console.error("Error generating multi-language ebook:", error);
             const { updateEbookStatus } = await import("./db");
             await updateEbookStatus(ebookId, "failed", {
               errorMessage: error.message,

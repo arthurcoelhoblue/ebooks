@@ -65,6 +65,24 @@ export type PublishingGuide = typeof publishingGuides.$inferSelect;
 export type InsertPublishingGuide = typeof publishingGuides.$inferInsert;
 
 /**
+ * Stores generated files for each language of an eBook
+ */
+export const ebookFiles = mysqlTable("ebookFiles", {
+  id: int("id").autoincrement().primaryKey(),
+  ebookId: int("ebookId").notNull(),
+  languageCode: varchar("languageCode", { length: 5 }).notNull(), // pt, en, es, etc.
+  epubUrl: text("epubUrl"),
+  pdfUrl: text("pdfUrl"),
+  coverUrl: text("coverUrl"),
+  status: mysqlEnum("status", ["processing", "completed", "failed"]).default("processing").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EbookFile = typeof ebookFiles.$inferSelect;
+export type InsertEbookFile = typeof ebookFiles.$inferInsert;
+
+/**
  * Schedules table - stores automatic ebook generation schedules
  */
 export const schedules = mysqlTable("schedules", {

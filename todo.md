@@ -33,6 +33,7 @@
 ## Bugs Reportados
 - [ ] Agendamentos não estão sendo executados automaticamente (em desenvolvimento)
 - [x] Falta opção de selecionar idiomas nos agendamentos (RESOLVIDO)
+- [x] Erro ao baixar PDF: JSON parse error (RESOLVIDO - implementado sistema multi-idioma)
 
 ## In Progress
 - [x] Campo languages adicionado ao banco de dados
@@ -42,9 +43,18 @@
 - [x] Campo languages adicionado à tabela schedules
 - [x] Seletor de 11 idiomas no formulário de agendamento
 - [x] Backend atualizado para salvar idiomas do agendamento
-- [ ] Implementar geração de múltiplos arquivos por idioma
-- [ ] Indicadores visuais de idiomas disponíveis nos cards
-- [ ] Download separado por idioma
+## Implementação Multi-Idioma Completa
+- [x] Tabela ebookFiles criada no banco de dados
+- [x] Helper multiLanguageGenerator.ts para geração multi-idioma
+- [x] Helper translator.ts para tradução com IA
+- [x] Helpers de banco (createEbookFile, getEbookFilesByEbookId)
+- [x] Router ebooks.getFiles para buscar arquivos por idioma
+- [x] Backend atualizado para gerar arquivo por idioma
+- [x] Dialog de arquivos por idioma no Dashboard
+- [x] Interface com bandeiras e botões de download por idioma
+- [x] Suporte a 11 idiomas (PT, EN, ES, ZH, HI, AR, BN, RU, JA, DE, FR)
+
+## Em Implementação Agora
 - [ ] Execução automática de agendamentos (worker em desenvolvimento)
 - [x] Campo de número de vendas nas publicações (salesCount)
 - [x] Dashboard financeiro com ranking de eBooks (/analytics)

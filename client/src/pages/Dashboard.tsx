@@ -19,6 +19,8 @@ export default function Dashboard() {
   const [author, setAuthor] = useState(user?.name || "");
   const [numChapters, setNumChapters] = useState(5);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["pt"]);
+  const [showFilesDialog, setShowFilesDialog] = useState(false);
+  const [selectedEbookForFiles, setSelectedEbookForFiles] = useState<number | null>(null);
 
   const languages = [
     { code: "pt", name: "Portugu\u00eas", flag: "\ud83c\udde7\ud83c\uddf7" },
@@ -282,22 +284,18 @@ export default function Dashboard() {
                       {ebook.status === "completed" ? (
                         <>
                           <div className="flex gap-2">
-                            {ebook.epubUrl && (
-                              <Button variant="outline" size="sm" className="flex-1" asChild>
-                                <a href={ebook.epubUrl} target="_blank" rel="noopener noreferrer">
-                                  <BookOpen className="w-4 h-4 mr-2" />
-                                  EPUB
-                                </a>
-                              </Button>
-                            )}
-                            {ebook.pdfUrl && (
-                              <Button variant="outline" size="sm" className="flex-1" asChild>
-                                <a href={ebook.pdfUrl} target="_blank" rel="noopener noreferrer">
-                                  <FileText className="w-4 h-4 mr-2" />
-                                  PDF
-                                </a>
-                              </Button>
-                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => {
+                                setSelectedEbookForFiles(ebook.id);
+                                setShowFilesDialog(true);
+                              }}
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              Baixar Arquivos
+                            </Button>
                           </div>
                           <Link href={`/ebook/${ebook.id}`}>
                             <Button className="w-full" size="sm">
@@ -341,7 +339,103 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+
+      {/* Dialog de arquivos por idioma */}
+      <FilesDialog
+        open={showFilesDialog}
+        onOpenChange={setShowFilesDialog}
+        ebookId={selectedEbookForFiles}
+      />
     </div>
+  );
+}
+
+// Componente separado para dialog de arquivos
+function FilesDialog({ open, onOpenChange, ebookId }: { open: boolean; onOpenChange: (open: boolean) => void; ebookId: number | null }) {
+  const { data: files, isLoading } = trpc.ebooks.getFiles.useQuery(
+    { id: ebookId! },
+    { enabled: !!ebookId }
+  );
+
+  const languages: Record<string, { name: string; flag: string }> = {
+    pt: { name: "Português", flag: "🇧🇷" },
+    en: { name: "English", flag: "🇬🇧" },
+    es: { name: "Español", flag: "🇪🇸" },
+    zh: { name: "中文", flag: "🇨🇳" },
+    hi: { name: "हिन्दी", flag: "🇮🇳" },
+    ar: { name: "العربية", flag: "🇸🇦" },
+    bn: { name: "বাংলা", flag: "🇧🇩" },
+    ru: { name: "Русский", flag: "🇷🇺" },
+    ja: { name: "日本語", flag: "🇯🇵" },
+    de: { name: "Deutsch", flag: "🇩🇪" },
+    fr: { name: "Français", flag: "🇫🇷" },
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Arquivos do eBook</DialogTitle>
+          <DialogDescription>
+            Baixe os arquivos nos idiomas disponíveis
+          </DialogDescription>
+        </DialogHeader>
+
+        {isLoading ? (
+          <div className="py-8 text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mt-2">Carregando arquivos...</p>
+          </div>
+        ) : files && files.length > 0 ? (
+          <div className="space-y-4">
+            {files.map((file) => {
+              const lang = languages[file.languageCode] || { name: file.languageCode, flag: "🌐" };
+              return (
+                <Card key={file.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{lang.flag}</span>
+                        <div>
+                          <h4 className="font-medium">{lang.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {file.status === "completed" ? "Pronto para download" : "Processando..."}
+                          </p>
+                        </div>
+                      </div>
+                      {file.status === "completed" && (
+                        <div className="flex gap-2">
+                          {file.epubUrl && (
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={file.epubUrl} target="_blank" rel="noopener noreferrer">
+                                <BookOpen className="w-4 h-4 mr-2" />
+                                EPUB
+                              </a>
+                            </Button>
+                          )}
+                          {file.pdfUrl && (
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={file.pdfUrl} target="_blank" rel="noopener noreferrer">
+                                <FileText className="w-4 h-4 mr-2" />
+                                PDF
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="py-8 text-center">
+            <p className="text-muted-foreground">Nenhum arquivo disponível</p>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

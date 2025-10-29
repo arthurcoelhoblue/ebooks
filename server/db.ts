@@ -77,6 +77,60 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
 }
 
+// ===== EbookFiles Helpers =====
+
+export async function createEbookFile(file: {
+  ebookId: number;
+  languageCode: string;
+  epubUrl?: string;
+  pdfUrl?: string;
+  coverUrl?: string;
+  status?: "processing" | "completed" | "failed";
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { ebookFiles } = await import("../drizzle/schema");
+  const result = await db.insert(ebookFiles).values(file);
+  return Number(result[0].insertId);
+}
+
+export async function getEbookFilesByEbookId(ebookId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const { ebookFiles } = await import("../drizzle/schema");
+  return await db.select().from(ebookFiles).where(eq(ebookFiles.ebookId, ebookId));
+}
+
+export async function getEbookFile(ebookId: number, languageCode: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const { ebookFiles } = await import("../drizzle/schema");
+  const result = await db
+    .select()
+    .from(ebookFiles)
+    .where(and(eq(ebookFiles.ebookId, ebookId), eq(ebookFiles.languageCode, languageCode)))
+    .limit(1);
+  return result[0];
+}
+
+export async function updateEbookFileStatus(
+  id: number,
+  status: "processing" | "completed" | "failed",
+  updates?: { epubUrl?: string; pdfUrl?: string; coverUrl?: string }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { ebookFiles } = await import("../drizzle/schema");
+  await db
+    .update(ebookFiles)
+    .set({ status, ...updates })
+    .where(eq(ebookFiles.id, id));
+}
+
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!db) {
