@@ -31,7 +31,7 @@
 - [ ] Execução automática dos agendamentos via cron job (requer configuração de servidor)
 
 ## Bugs Reportados
-- [ ] Agendamentos não estão sendo executados automaticamente (em desenvolvimento)
+- [x] Agendamentos não estão sendo executados automaticamente (RESOLVIDO - worker automático implementado com setInterval a cada 60s)
 - [x] Falta opção de selecionar idiomas nos agendamentos (RESOLVIDO)
 - [x] Erro ao baixar PDF: JSON parse error (RESOLVIDO - implementado sistema multi-idioma)
 - [x] Agendamentos não estão gerando arquivos multi-idioma (RESOLVIDO - schedulerWorker atualizado)

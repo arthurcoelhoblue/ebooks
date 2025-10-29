@@ -205,3 +205,26 @@ export async function triggerScheduleNow(scheduleId: number) {
   await processSchedules();
 }
 
+
+
+/**
+ * Starts the scheduler worker that runs every minute
+ */
+export function startSchedulerWorker() {
+  console.log("[Scheduler] Starting scheduler worker...");
+  
+  // Run immediately on startup
+  processSchedules().catch(error => {
+    console.error("[Scheduler] Error in initial run:", error);
+  });
+  
+  // Then run every minute
+  setInterval(() => {
+    processSchedules().catch(error => {
+      console.error("[Scheduler] Error in scheduled run:", error);
+    });
+  }, 60000); // 60 seconds = 1 minute
+  
+  console.log("[Scheduler] Worker started - checking schedules every minute");
+}
+
