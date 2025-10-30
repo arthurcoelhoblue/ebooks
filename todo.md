@@ -163,3 +163,8 @@
 ## Bug Urgente
 - [x] Agendamentos ainda usam gerador antigo - precisa usar modelo vencedor (RESOLVIDO)
 
+
+
+## Bug Crítico
+- [x] Erro JSON.parse ao abrir guia de monetização - linha 160 do EbookDetails.tsx (RESOLVIDO - adicionado try-catch)
+

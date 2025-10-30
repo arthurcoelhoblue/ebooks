@@ -142,9 +142,23 @@ export default function EbookDetails() {
     return publications?.some(p => p.platform === platform);
   };
 
-  // Parse keywords and categories
-  const keywords = metadata?.keywords ? JSON.parse(metadata.keywords) : [];
-  const categories = metadata?.categories ? JSON.parse(metadata.categories) : [];
+  // Parse keywords and categories with error handling
+  let keywords: string[] = [];
+  let categories: string[] = [];
+  
+  try {
+    keywords = metadata?.keywords ? JSON.parse(metadata.keywords) : [];
+  } catch (e) {
+    console.error('Error parsing keywords:', e);
+    keywords = [];
+  }
+  
+  try {
+    categories = metadata?.categories ? JSON.parse(metadata.categories) : [];
+  } catch (e) {
+    console.error('Error parsing categories:', e);
+    categories = [];
+  }
 
   if (ebookLoading || metadataLoading) {
     return (
