@@ -515,6 +515,30 @@ export const appRouter = router({
           categories: metadata.categories ? JSON.parse(metadata.categories) : [],
         };
       }),
+
+    // Get platform recommendations for an ebook
+    getPlatformRecommendations: protectedProcedure
+      .input((val: unknown) => {
+        if (
+          typeof val === "object" &&
+          val !== null &&
+          "theme" in val &&
+          typeof val.theme === "string" &&
+          "title" in val &&
+          typeof val.title === "string"
+        ) {
+          return {
+            theme: val.theme,
+            title: val.title,
+            description: "description" in val && typeof val.description === "string" ? val.description : undefined,
+          };
+        }
+        throw new Error("Invalid input");
+      })
+      .query(async ({ input }) => {
+        const { analyzePlatformRecommendations } = await import("./platformRecommender");
+        return await analyzePlatformRecommendations(input.theme, input.title, input.description);
+      }),
   }),
 });
 

@@ -33,6 +33,8 @@ const PLATFORMS = [
   { value: "hotmart", label: "Hotmart", color: "bg-blue-100 text-blue-700 border-blue-200" },
   { value: "eduzz", label: "Eduzz", color: "bg-green-100 text-green-700 border-green-200" },
   { value: "monetizze", label: "Monetizze", color: "bg-purple-100 text-purple-700 border-purple-200" },
+  { value: "kiwify", label: "Kiwify", color: "bg-pink-100 text-pink-700 border-pink-200" },
+  { value: "voomp", label: "Voomp", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
 ];
 
 function CopyButton({ value, label }: { value: string; label?: string }) {
@@ -394,11 +396,13 @@ export default function EbookDetails() {
 
           {/* Guias de Publicação */}
           <Tabs defaultValue="amazon_kdp" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-6 gap-1">
               <TabsTrigger value="amazon_kdp">Amazon KDP</TabsTrigger>
               <TabsTrigger value="hotmart">Hotmart</TabsTrigger>
               <TabsTrigger value="eduzz">Eduzz</TabsTrigger>
               <TabsTrigger value="monetizze">Monetizze</TabsTrigger>
+              <TabsTrigger value="kiwify">Kiwify</TabsTrigger>
+              <TabsTrigger value="voomp">Voomp</TabsTrigger>
             </TabsList>
 
             {/* Amazon KDP */}
@@ -623,22 +627,148 @@ export default function EbookDetails() {
               </Card>
             </TabsContent>
 
-            {/* Eduzz e Monetizze com estrutura similar */}
-            <TabsContent value="eduzz">
+            {/* Eduzz */}
+            <TabsContent value="eduzz" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Guia de Publicação - Eduzz</CardTitle>
-                  <CardDescription>Em breve - guia detalhado</CardDescription>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Guia de Publicação - Eduzz</span>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="https://www.eduzz.com" target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Abrir Eduzz
+                      </a>
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Plataforma brasileira com checkout próprio e recuperação de carrinho
+                  </CardDescription>
                 </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">Passos rápidos:</p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>Acesse MyEduzz → Menu "Produtos"</li>
+                      <li>Clique "+ Criar novo produto" → "Digital"</li>
+                      <li>Preencha título, descrição (100+ caracteres), imagem 200x200</li>
+                      <li>Tipo de cobrança: "Única"</li>
+                      <li>Adicionar entrega → Upload do PDF/EPUB</li>
+                      <li>Ative Recuperação de Vendas → "Pronto para vender"</li>
+                    </ol>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Use os botões "Baixar Arquivos" acima para obter PDF e EPUB
+                  </p>
+                </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="monetizze">
+            {/* Monetizze */}
+            <TabsContent value="monetizze" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Guia de Publicação - Monetizze</CardTitle>
-                  <CardDescription>Em breve - guia detalhado</CardDescription>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Guia de Publicação - Monetizze</span>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="https://www.monetizze.com.br" target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Abrir Monetizze
+                      </a>
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Sistema de afiliados robusto, ideal para nichos lucrativos
+                  </CardDescription>
                 </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">Passos rápidos:</p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>Crie conta em monetizze.com.br</li>
+                      <li>Painel → "Produtos" → "Novo Produto"</li>
+                      <li>Preencha nome e descrição do produto</li>
+                      <li>Formato: "Ebooks, Documentos, Texto"</li>
+                      <li>Cobrança: "Única" + defina preço</li>
+                      <li>Garantia mínima 7 dias + e-mail/telefone suporte</li>
+                      <li>Upload capa e arquivo PDF</li>
+                      <li>"Salvar e enviar para análise"</li>
+                    </ol>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Use os botões "Baixar Arquivos" acima para obter capa e PDF
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Kiwify */}
+            <TabsContent value="kiwify" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Guia de Publicação - Kiwify</span>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="https://www.kiwify.com.br" target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Abrir Kiwify
+                      </a>
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Plataforma moderna e intuitiva, ideal para iniciantes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">Passos rápidos:</p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>Crie conta gratuita na Kiwify</li>
+                      <li>Upload do arquivo PDF e capa</li>
+                      <li>Preencha título e descrição</li>
+                      <li>Defina o preço</li>
+                      <li>Configure métodos de pagamento</li>
+                      <li>Gere links e divulgue</li>
+                    </ol>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Use os botões "Baixar Arquivos" acima para obter capa e PDF
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Voomp */}
+            <TabsContent value="voomp" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Guia de Publicação - Voomp</span>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href="https://www.voompcreators.com.br" target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Abrir Voomp
+                      </a>
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Parte do grupo Cogna Educação, foco em educação de qualidade
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">Passos rápidos:</p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>Cadastro em voompcreators.com.br (3 passos)</li>
+                      <li>Upload do eBook PDF</li>
+                      <li>Preencha título, descrição e preço</li>
+                      <li>Sistema de vendas e área de membros automáticos</li>
+                      <li>Comece a vender com Voomp Play</li>
+                    </ol>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Use os botões "Baixar Arquivos" acima para obter o PDF
+                  </p>
+                </CardContent>
               </Card>
             </TabsContent>
           </Tabs>

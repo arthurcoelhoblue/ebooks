@@ -168,3 +168,15 @@
 ## Bug Crítico
 - [x] Erro JSON.parse ao abrir guia de monetização - linha 160 do EbookDetails.tsx (RESOLVIDO - adicionado try-catch)
 
+
+
+
+## Novas Funcionalidades - Guias de Publicação ✅ IMPLEMENTADO
+- [x] Completar guia de publicação Eduzz (passo a passo simplificado com 6 etapas)
+- [x] Completar guia de publicação Monetizze (passo a passo simplificado com 8 etapas)
+- [x] Pesquisar e adicionar mais 2 plataformas de eBooks (Kiwify e Voomp adicionadas)
+- [x] Criar análise inteligente com IA que recomenda melhor plataforma por tema/nicho (backend implementado)
+- [x] Sistema com 6 plataformas: Amazon KDP, Hotmart, Eduzz, Monetizze, Kiwify, Voomp
+- [x] Guias simplificados com botões de acesso direto às plataformas
+- [x] Endpoint tRPC para recomendações inteligentes (platformRecommender.ts)
+
