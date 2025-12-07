@@ -1,0 +1,2 @@
+ALTER TABLE `publications` MODIFY COLUMN `platform` enum('amazon_kdp','hotmart','eduzz','monetizze','kiwify','voomp') NOT NULL;--> statement-breakpoint
+ALTER TABLE `publishingGuides` MODIFY COLUMN `platform` enum('amazon_kdp','hotmart','eduzz','monetizze','kiwify','voomp') NOT NULL;

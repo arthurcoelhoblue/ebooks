@@ -194,3 +194,16 @@
 - [x] Adicionar logs de auditoria (console.warn + console.log)
 - [x] Testar com múltiplos usuários (A e B) - vitest criado
 - [x] Validar erro FORBIDDEN em acessos não autorizados - 4 testes passaram
+
+
+## PATCH 1.1.0 — Enum de Plataformas + Correção das Publicações ✅ CONCLUÍDO
+- [x] Atualizar enum platform no drizzle/schema.ts (adicionar kiwify, voomp)
+- [x] Criar migration para atualizar banco de dados (0013_fearless_chameleon.sql)
+- [x] Aplicar migration com ALTER TABLE direto no banco
+- [x] Adicionar validação z.enum no backend (routers.ts)
+- [x] Sincronizar frontend com platformLabels consistente
+- [x] platformRecommender.ts já tinha Kiwify e Voomp
+- [x] Criar testes automatizados (8 testes passaram)
+- [x] Validar enum em publications e publishingGuides
+- [x] Frontend e backend sincronizados
+- [x] Gerar relatório exportável do PATCH 1.1.0

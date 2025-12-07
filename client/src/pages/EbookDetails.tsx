@@ -117,7 +117,7 @@ export default function EbookDetails() {
   };
 
   const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState<"amazon_kdp" | "hotmart" | "eduzz" | "monetizze">("amazon_kdp");
+  const [selectedPlatform, setSelectedPlatform] = useState<"amazon_kdp" | "hotmart" | "eduzz" | "monetizze" | "kiwify" | "voomp">("amazon_kdp");
   const [publicationUrl, setPublicationUrl] = useState("");
 
   const publishMutation = trpc.publications.publish.useMutation({

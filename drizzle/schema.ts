@@ -54,7 +54,7 @@ export type InsertEbook = typeof ebooks.$inferInsert;
 export const publishingGuides = mysqlTable("publishingGuides", {
   id: int("id").autoincrement().primaryKey(),
   ebookId: int("ebookId").notNull(),
-  platform: mysqlEnum("platform", ["amazon_kdp", "hotmart", "eduzz", "monetizze"]).notNull(),
+  platform: mysqlEnum("platform", ["amazon_kdp", "hotmart", "eduzz", "monetizze", "kiwify", "voomp"]).notNull(),
   completed: int("completed").default(0).notNull(), // boolean as tinyint
   checklist: text("checklist"), // JSON string of checklist items
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -135,7 +135,7 @@ export type InsertEbookMetadata = typeof ebookMetadata.$inferInsert;
 export const publications = mysqlTable("publications", {
   id: int("id").autoincrement().primaryKey(),
   ebookId: int("ebookId").notNull(),
-  platform: mysqlEnum("platform", ["amazon_kdp", "hotmart", "eduzz", "monetizze"]).notNull(),
+  platform: mysqlEnum("platform", ["amazon_kdp", "hotmart", "eduzz", "monetizze", "kiwify", "voomp"]).notNull(),
   published: int("published").default(1).notNull(), // boolean as tinyint
   publicationUrl: text("publicationUrl"),
   publishedAt: timestamp("publishedAt").defaultNow().notNull(),

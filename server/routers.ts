@@ -414,7 +414,7 @@ export const appRouter = router({
     publish: protectedProcedure
       .input(z.object({
         ebookId: z.number(),
-        platform: z.enum(["amazon_kdp", "hotmart", "eduzz", "monetizze"]),
+        platform: z.enum(["amazon_kdp", "hotmart", "eduzz", "monetizze", "kiwify", "voomp"]),
         publicationUrl: z.string().optional(),
         trafficCost: z.string().optional(),
         otherCosts: z.string().optional(),
