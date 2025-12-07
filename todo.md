@@ -180,3 +180,17 @@
 - [x] Guias simplificados com botões de acesso direto às plataformas
 - [x] Endpoint tRPC para recomendações inteligentes (platformRecommender.ts)
 
+
+
+## PATCH 1.0.0 — Segurança Multi-Tenant (CRÍTICO)
+- [x] Criar helper assertEbookOwner() no server/db.ts
+- [x] Aplicar ownership em ebooks.getFiles
+- [x] Aplicar ownership em publications.getByEbookId
+- [x] Aplicar ownership em publications.publish
+- [x] Aplicar ownership em publications.delete
+- [x] Aplicar ownership em financial.getByEbookId
+- [x] Aplicar ownership em financial.update
+- [x] Aplicar ownership em metadata.getByEbookId
+- [x] Adicionar logs de auditoria (console.warn + console.log)
+- [x] Testar com múltiplos usuários (A e B) - vitest criado
+- [x] Validar erro FORBIDDEN em acessos não autorizados - 4 testes passaram

@@ -38,8 +38,9 @@ export const appRouter = router({
         }
         throw new Error("Invalid input");
       })
-      .query(async ({ input }) => {
-        const { getEbookFilesByEbookId } = await import("./db");
+      .query(async ({ input, ctx }) => {
+        const { assertEbookOwner, getEbookFilesByEbookId } = await import("./db");
+        await assertEbookOwner(input.id, ctx.user.id);
         return await getEbookFilesByEbookId(input.id);
       }),
 
@@ -403,8 +404,9 @@ export const appRouter = router({
         }
         throw new Error("Invalid input");
       })
-      .query(async ({ input }) => {
-        const { getPublicationsByEbookId } = await import("./db");
+      .query(async ({ input, ctx }) => {
+        const { assertEbookOwner, getPublicationsByEbookId } = await import("./db");
+        await assertEbookOwner(input.ebookId, ctx.user.id);
         return getPublicationsByEbookId(input.ebookId);
       }),
 
@@ -418,8 +420,9 @@ export const appRouter = router({
         otherCosts: z.string().optional(),
         revenue: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
-        const { createPublication } = await import("./db");
+      .mutation(async ({ input, ctx }) => {
+        const { assertEbookOwner, createPublication } = await import("./db");
+        await assertEbookOwner(input.ebookId, ctx.user.id);
         await createPublication({
           ebookId: input.ebookId,
           platform: input.platform,
@@ -446,8 +449,9 @@ export const appRouter = router({
         }
         throw new Error("Invalid input");
       })
-      .mutation(async ({ input }) => {
-        const { deletePublication } = await import("./db");
+      .mutation(async ({ input, ctx }) => {
+        const { assertEbookOwner, deletePublication } = await import("./db");
+        await assertEbookOwner(input.ebookId, ctx.user.id);
         await deletePublication(input.ebookId, input.platform);
         return { success: true };
       }),
@@ -462,8 +466,9 @@ export const appRouter = router({
         }
         throw new Error("Invalid input");
       })
-      .query(async ({ input }) => {
-        const { getFinancialMetricsByEbookId } = await import("./db");
+      .query(async ({ input, ctx }) => {
+        const { assertEbookOwner, getFinancialMetricsByEbookId } = await import("./db");
+        await assertEbookOwner(input.ebookId, ctx.user.id);
         return getFinancialMetricsByEbookId(input.ebookId);
       }),
 
@@ -486,8 +491,9 @@ export const appRouter = router({
         }
         throw new Error("Invalid input");
       })
-      .mutation(async ({ input }) => {
-        const { updateFinancialMetrics } = await import("./db");
+      .mutation(async ({ input, ctx }) => {
+        const { assertEbookOwner, updateFinancialMetrics } = await import("./db");
+        await assertEbookOwner(input.ebookId, ctx.user.id);
         const { ebookId, ...data } = input;
         await updateFinancialMetrics(ebookId, data);
         return { success: true };
@@ -503,8 +509,9 @@ export const appRouter = router({
         }
         throw new Error("Invalid input");
       })
-      .query(async ({ input }) => {
-        const { getEbookMetadataByEbookId } = await import("./db");
+      .query(async ({ input, ctx }) => {
+        const { assertEbookOwner, getEbookMetadataByEbookId } = await import("./db");
+        await assertEbookOwner(input.ebookId, ctx.user.id);
         const metadata = await getEbookMetadataByEbookId(input.ebookId);
         if (!metadata) return null;
         

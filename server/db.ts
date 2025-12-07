@@ -335,3 +335,28 @@ export async function deleteEbook(ebookId: number) {
   await db.delete(ebooks).where(eq(ebooks.id, ebookId));
 }
 
+
+
+/**
+ * Security helper: Assert that the user owns the eBook
+ * Throws FORBIDDEN if eBook doesn't exist or belongs to another user
+ * @param ebookId - ID of the eBook to check
+ * @param userId - ID of the user attempting access
+ * @returns The eBook object if authorized
+ */
+export async function assertEbookOwner(ebookId: number, userId: number) {
+  const ebook = await getEbookById(ebookId);
+  
+  if (!ebook) {
+    console.warn(`[Security] Attempt to access non-existent eBook ${ebookId} by user ${userId}`);
+    throw new Error("FORBIDDEN: eBook not found");
+  }
+  
+  if (ebook.userId !== userId) {
+    console.warn(`[Security] User ${userId} attempted to access eBook ${ebookId} owned by user ${ebook.userId}`);
+    throw new Error("FORBIDDEN: Unauthorized access to eBook");
+  }
+  
+  console.log(`[Security] User ${userId} authorized to access eBook ${ebookId}`);
+  return ebook;
+}
