@@ -207,3 +207,16 @@
 - [x] Validar enum em publications e publishingGuides
 - [x] Frontend e backend sincronizados
 - [x] Gerar relatório exportável do PATCH 1.1.0
+
+
+## PATCH 1.2.0 — Correção do Analytics + Publications.listAll ✅ CONCLUÍDO
+- [x] Implementar publications.listAll com join em ebooks
+- [x] Adicionar ownership validation (where userId = ctx.user.id)
+- [x] Retornar todas as publicações do usuário logado (10 campos)
+- [x] Analytics.tsx já usava listAll - funciona automaticamente
+- [x] Endpoint anterior retornava [] - agora retorna dados reais
+- [x] Cálculos de analytics já estavam corretos no frontend
+- [x] Criar testes automatizados (16 testes passaram)
+- [x] Validar ownership, empty cases, analytics calculations
+- [x] Documentar before/after e impacto
+- [x] Gerar relatório exportável do PATCH 1.2.0

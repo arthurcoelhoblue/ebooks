@@ -391,10 +391,31 @@ export const appRouter = router({
   }),
 
   publications: router({
-    // List all publications
+    // List all publications for the current user
     listAll: protectedProcedure.query(async ({ ctx }) => {
-      // Return empty array for now - will be populated when publications exist
-      return [];
+      const { getDb } = await import("./db");
+      const db = await getDb();
+      if (!db) return [];
+
+      const { publications, ebooks } = await import("../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+
+      return db
+        .select({
+          id: publications.id,
+          ebookId: publications.ebookId,
+          platform: publications.platform,
+          publicationUrl: publications.publicationUrl,
+          trafficCost: publications.trafficCost,
+          otherCosts: publications.otherCosts,
+          revenue: publications.revenue,
+          salesCount: publications.salesCount,
+          publishedAt: publications.publishedAt,
+          notes: publications.notes,
+        })
+        .from(publications)
+        .innerJoin(ebooks, eq(ebooks.id, publications.ebookId))
+        .where(eq(ebooks.userId, ctx.user.id));
     }),
     // Get publications for an ebook
     getByEbookId: protectedProcedure
